@@ -17,7 +17,7 @@ function Stub({ title }: { title: string }) {
 export const Route = createFileRoute("/_app/$")({
   component: () => {
     const splat = Route.useParams()._splat ?? "";
-    const title = splat.split("/").pop()?.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) ?? "Page";
+    const title = splat.split("/").pop()?.replace(/-/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()) ?? "Page";
     return <Stub title={title} />;
   },
 });
