@@ -9,38 +9,137 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
+import { Route as AppSplatRouteImport } from './routes/_app/$'
+import { Route as AppClientsStaticRouteImport } from './routes/_app/clients.static'
+import { Route as AppClientsPppoeRouteImport } from './routes/_app/clients.pppoe'
+import { Route as AppClientsHotspotRouteImport } from './routes/_app/clients.hotspot'
 
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSplatRoute = AppSplatRouteImport.update({
+  id: '/$',
+  path: '/$',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppClientsStaticRoute = AppClientsStaticRouteImport.update({
+  id: '/clients/static',
+  path: '/clients/static',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppClientsPppoeRoute = AppClientsPppoeRouteImport.update({
+  id: '/clients/pppoe',
+  path: '/clients/pppoe',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppClientsHotspotRoute = AppClientsHotspotRouteImport.update({
+  id: '/clients/hotspot',
+  path: '/clients/hotspot',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/$': typeof AppSplatRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/clients/hotspot': typeof AppClientsHotspotRoute
+  '/clients/pppoe': typeof AppClientsPppoeRoute
+  '/clients/static': typeof AppClientsStaticRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/$': typeof AppSplatRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/clients/hotspot': typeof AppClientsHotspotRoute
+  '/clients/pppoe': typeof AppClientsPppoeRoute
+  '/clients/static': typeof AppClientsStaticRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_app/$': typeof AppSplatRoute
+  '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/clients/hotspot': typeof AppClientsHotspotRoute
+  '/_app/clients/pppoe': typeof AppClientsPppoeRoute
+  '/_app/clients/static': typeof AppClientsStaticRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/$'
+    | '/dashboard'
+    | '/clients/hotspot'
+    | '/clients/pppoe'
+    | '/clients/static'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/$'
+    | '/dashboard'
+    | '/clients/hotspot'
+    | '/clients/pppoe'
+    | '/clients/static'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/auth'
+    | '/_app/$'
+    | '/_app/dashboard'
+    | '/_app/clients/hotspot'
+    | '/_app/clients/pppoe'
+    | '/_app/clients/static'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
+  AuthRoute: typeof AuthRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,12 +147,76 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/dashboard': {
+      id: '/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/$': {
+      id: '/_app/$'
+      path: '/$'
+      fullPath: '/$'
+      preLoaderRoute: typeof AppSplatRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/clients/static': {
+      id: '/_app/clients/static'
+      path: '/clients/static'
+      fullPath: '/clients/static'
+      preLoaderRoute: typeof AppClientsStaticRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/clients/pppoe': {
+      id: '/_app/clients/pppoe'
+      path: '/clients/pppoe'
+      fullPath: '/clients/pppoe'
+      preLoaderRoute: typeof AppClientsPppoeRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/clients/hotspot': {
+      id: '/_app/clients/hotspot'
+      path: '/clients/hotspot'
+      fullPath: '/clients/hotspot'
+      preLoaderRoute: typeof AppClientsHotspotRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppSplatRoute: typeof AppSplatRoute
+  AppDashboardRoute: typeof AppDashboardRoute
+  AppClientsHotspotRoute: typeof AppClientsHotspotRoute
+  AppClientsPppoeRoute: typeof AppClientsPppoeRoute
+  AppClientsStaticRoute: typeof AppClientsStaticRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppSplatRoute: AppSplatRoute,
+  AppDashboardRoute: AppDashboardRoute,
+  AppClientsHotspotRoute: AppClientsHotspotRoute,
+  AppClientsPppoeRoute: AppClientsPppoeRoute,
+  AppClientsStaticRoute: AppClientsStaticRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
+  AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
