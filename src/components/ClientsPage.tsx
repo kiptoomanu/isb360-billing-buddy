@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { syncClientToRouter, setClientEnabled, removeClientFromRouter } from "@/lib/mikrotik.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +16,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Plus, Pencil, Trash2, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, RefreshCw, Power, PowerOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export type ClientType = "pppoe" | "static" | "hotspot";
@@ -30,24 +32,33 @@ type Client = {
   monthly_fee: number;
   ip_address: string | null;
   expiry_date: string | null;
+  router_id: string | null;
 };
+
+type RouterRow = { id: string; name: string };
 
 const labels: Record<ClientType, string> = { pppoe: "PPPoE", static: "Static IP", hotspot: "Hotspot" };
 
 export function ClientsPage({ type }: { type: ClientType }) {
   const [rows, setRows] = useState<Client[]>([]);
+  const [routers, setRouters] = useState<RouterRow[]>([]);
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Client | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const syncFn = useServerFn(syncClientToRouter);
+  const toggleFn = useServerFn(setClientEnabled);
+  const removeFn = useServerFn(removeClientFromRouter);
 
   const load = async () => {
-    const { data, error } = await supabase
-      .from("clients")
-      .select("*")
-      .eq("type", type)
-      .order("created_at", { ascending: false });
+    const [{ data, error }, routersRes] = await Promise.all([
+      supabase.from("clients").select("*").eq("type", type).order("created_at", { ascending: false }),
+      supabase.from("routers").select("id,name").order("name"),
+    ]);
     if (error) return toast.error(error.message);
     setRows((data ?? []) as Client[]);
+    setRouters((routersRes.data ?? []) as RouterRow[]);
   };
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [type]);
@@ -60,11 +71,32 @@ export function ClientsPage({ type }: { type: ClientType }) {
   );
 
   const remove = async (id: string) => {
-    if (!confirm("Delete this client?")) return;
+    if (!confirm("Delete this client? This also removes them from the router if linked.")) return;
+    setBusyId(id);
+    try { await removeFn({ data: { clientId: id } }); } catch {}
     const { error } = await supabase.from("clients").delete().eq("id", id);
+    setBusyId(null);
     if (error) return toast.error(error.message);
-    toast.success("Deleted");
-    load();
+    toast.success("Deleted"); load();
+  };
+
+  const sync = async (id: string) => {
+    setBusyId(id);
+    try {
+      const res: any = await syncFn({ data: { clientId: id } });
+      toast.success(`Synced (${res.action})`);
+    } catch (e: any) { toast.error(e?.message ?? "Sync failed"); }
+    finally { setBusyId(null); load(); }
+  };
+
+  const toggle = async (c: Client) => {
+    setBusyId(c.id);
+    const enabled = c.status !== "active";
+    try {
+      await toggleFn({ data: { clientId: c.id, enabled } });
+      toast.success(enabled ? "Activated" : "Suspended");
+    } catch (e: any) { toast.error(e?.message ?? "Failed"); }
+    finally { setBusyId(null); load(); }
   };
 
   return (
@@ -72,13 +104,13 @@ export function ClientsPage({ type }: { type: ClientType }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">{labels[type]} Clients</h1>
-          <p className="text-sm text-muted-foreground">{rows.length} total</p>
+          <p className="text-sm text-muted-foreground">{rows.length} total · sync provisions PPPoE secrets / Hotspot users to MikroTik</p>
         </div>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setEditing(null); }}>
           <DialogTrigger asChild>
             <Button className="gap-2"><Plus className="h-4 w-4" /> Add Client</Button>
           </DialogTrigger>
-          <ClientDialog type={type} editing={editing} onClose={() => { setOpen(false); setEditing(null); load(); }} />
+          <ClientDialog type={type} editing={editing} routers={routers} onClose={() => { setOpen(false); setEditing(null); load(); }} />
         </Dialog>
       </div>
 
@@ -95,36 +127,50 @@ export function ClientsPage({ type }: { type: ClientType }) {
                 <TableHead>Username</TableHead>
                 <TableHead>Phone</TableHead>
                 <TableHead>IP</TableHead>
-                <TableHead>Fee (Ksh)</TableHead>
+                <TableHead>Router</TableHead>
+                <TableHead>Fee</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Expiry</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow><TableCell colSpan={8} className="py-10 text-center text-sm text-muted-foreground">No clients yet. Add your first one.</TableCell></TableRow>
-              ) : filtered.map((c) => (
-                <TableRow key={c.id}>
-                  <TableCell className="font-medium">{c.full_name}</TableCell>
-                  <TableCell>{c.username ?? "—"}</TableCell>
-                  <TableCell>{c.phone ?? "—"}</TableCell>
-                  <TableCell>{c.ip_address ?? "—"}</TableCell>
-                  <TableCell>{Number(c.monthly_fee).toFixed(2)}</TableCell>
-                  <TableCell>
-                    <Badge variant={c.status === "active" ? "default" : c.status === "expired" ? "destructive" : "secondary"}>{c.status}</Badge>
-                  </TableCell>
-                  <TableCell>{c.expiry_date ?? "—"}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" onClick={() => { setEditing(c); setOpen(true); }}>
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => remove(c.id)}>
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+              ) : filtered.map((c) => {
+                const routerName = routers.find((r) => r.id === c.router_id)?.name ?? "—";
+                const isBusy = busyId === c.id;
+                return (
+                  <TableRow key={c.id}>
+                    <TableCell className="font-medium">{c.full_name}</TableCell>
+                    <TableCell>{c.username ?? "—"}</TableCell>
+                    <TableCell>{c.phone ?? "—"}</TableCell>
+                    <TableCell>{c.ip_address ?? "—"}</TableCell>
+                    <TableCell className="text-xs">{routerName}</TableCell>
+                    <TableCell>{Number(c.monthly_fee).toFixed(2)}</TableCell>
+                    <TableCell>
+                      <Badge variant={c.status === "active" ? "default" : c.status === "expired" ? "destructive" : "secondary"}>{c.status}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {(type === "pppoe" || type === "hotspot") && c.router_id && (
+                        <>
+                          <Button variant="ghost" size="icon" disabled={isBusy} onClick={() => sync(c.id)} title="Sync to router">
+                            {isBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                          </Button>
+                          <Button variant="ghost" size="icon" disabled={isBusy} onClick={() => toggle(c)} title={c.status === "active" ? "Suspend" : "Activate"}>
+                            {c.status === "active" ? <PowerOff className="h-4 w-4 text-destructive" /> : <Power className="h-4 w-4 text-primary" />}
+                          </Button>
+                        </>
+                      )}
+                      <Button variant="ghost" size="icon" onClick={() => { setEditing(c); setOpen(true); }}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => remove(c.id)} disabled={isBusy}>
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </div>
@@ -133,7 +179,7 @@ export function ClientsPage({ type }: { type: ClientType }) {
   );
 }
 
-function ClientDialog({ type, editing, onClose }: { type: ClientType; editing: Client | null; onClose: () => void }) {
+function ClientDialog({ type, editing, routers, onClose }: { type: ClientType; editing: Client | null; routers: RouterRow[]; onClose: () => void }) {
   const [form, setForm] = useState({
     full_name: editing?.full_name ?? "",
     phone: editing?.phone ?? "",
@@ -143,6 +189,7 @@ function ClientDialog({ type, editing, onClose }: { type: ClientType; editing: C
     ip_address: editing?.ip_address ?? "",
     expiry_date: editing?.expiry_date ?? "",
     status: editing?.status ?? "active",
+    router_id: editing?.router_id ?? "",
   });
   const [busy, setBusy] = useState(false);
 
@@ -158,6 +205,7 @@ function ClientDialog({ type, editing, onClose }: { type: ClientType; editing: C
       ip_address: form.ip_address || null,
       expiry_date: form.expiry_date || null,
       status: form.status as Client["status"],
+      router_id: form.router_id || null,
       type,
     };
     const res = editing
@@ -192,6 +240,16 @@ function ClientDialog({ type, editing, onClose }: { type: ClientType; editing: C
               <SelectItem value="active">Active</SelectItem>
               <SelectItem value="expired">Expired</SelectItem>
               <SelectItem value="suspended">Suspended</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5 col-span-2">
+          <Label>MikroTik Router</Label>
+          <Select value={form.router_id || "none"} onValueChange={(v) => set("router_id")(v === "none" ? "" : v)}>
+            <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">— None —</SelectItem>
+              {routers.map((r) => <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
