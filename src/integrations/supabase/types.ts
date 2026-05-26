@@ -24,6 +24,7 @@ export type Database = {
           ip_address: string | null
           monthly_fee: number
           phone: string | null
+          router_id: string | null
           station_id: string | null
           status: Database["public"]["Enums"]["client_status"]
           type: Database["public"]["Enums"]["client_type"]
@@ -39,6 +40,7 @@ export type Database = {
           ip_address?: string | null
           monthly_fee?: number
           phone?: string | null
+          router_id?: string | null
           station_id?: string | null
           status?: Database["public"]["Enums"]["client_status"]
           type: Database["public"]["Enums"]["client_type"]
@@ -54,6 +56,7 @@ export type Database = {
           ip_address?: string | null
           monthly_fee?: number
           phone?: string | null
+          router_id?: string | null
           station_id?: string | null
           status?: Database["public"]["Enums"]["client_status"]
           type?: Database["public"]["Enums"]["client_type"]
@@ -61,6 +64,13 @@ export type Database = {
           username?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "clients_router_id_fkey"
+            columns: ["router_id"]
+            isOneToOne: false
+            referencedRelation: "routers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "clients_station_id_fkey"
             columns: ["station_id"]
@@ -94,6 +104,48 @@ export type Database = {
           full_name?: string | null
           id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      routers: {
+        Row: {
+          created_at: string
+          host: string
+          id: string
+          name: string
+          notes: string | null
+          password: string
+          port: number
+          station_id: string | null
+          updated_at: string
+          use_https: boolean
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          host: string
+          id?: string
+          name: string
+          notes?: string | null
+          password: string
+          port?: number
+          station_id?: string | null
+          updated_at?: string
+          use_https?: boolean
+          username: string
+        }
+        Update: {
+          created_at?: string
+          host?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          password?: string
+          port?: number
+          station_id?: string | null
+          updated_at?: string
+          use_https?: boolean
+          username?: string
         }
         Relationships: []
       }

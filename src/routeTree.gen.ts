@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppRoutersRouteImport } from './routes/_app/routers'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppSplatRouteImport } from './routes/_app/$'
 import { Route as AppClientsStaticRouteImport } from './routes/_app/clients.static'
@@ -31,6 +32,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoutersRoute = AppRoutersRouteImport.update({
+  id: '/routers',
+  path: '/routers',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
@@ -63,6 +69,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/$': typeof AppSplatRoute
   '/dashboard': typeof AppDashboardRoute
+  '/routers': typeof AppRoutersRoute
   '/clients/hotspot': typeof AppClientsHotspotRoute
   '/clients/pppoe': typeof AppClientsPppoeRoute
   '/clients/static': typeof AppClientsStaticRoute
@@ -72,6 +79,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/$': typeof AppSplatRoute
   '/dashboard': typeof AppDashboardRoute
+  '/routers': typeof AppRoutersRoute
   '/clients/hotspot': typeof AppClientsHotspotRoute
   '/clients/pppoe': typeof AppClientsPppoeRoute
   '/clients/static': typeof AppClientsStaticRoute
@@ -83,6 +91,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_app/$': typeof AppSplatRoute
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/routers': typeof AppRoutersRoute
   '/_app/clients/hotspot': typeof AppClientsHotspotRoute
   '/_app/clients/pppoe': typeof AppClientsPppoeRoute
   '/_app/clients/static': typeof AppClientsStaticRoute
@@ -94,6 +103,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/$'
     | '/dashboard'
+    | '/routers'
     | '/clients/hotspot'
     | '/clients/pppoe'
     | '/clients/static'
@@ -103,6 +113,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/$'
     | '/dashboard'
+    | '/routers'
     | '/clients/hotspot'
     | '/clients/pppoe'
     | '/clients/static'
@@ -113,6 +124,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_app/$'
     | '/_app/dashboard'
+    | '/_app/routers'
     | '/_app/clients/hotspot'
     | '/_app/clients/pppoe'
     | '/_app/clients/static'
@@ -146,6 +158,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_app/routers': {
+      id: '/_app/routers'
+      path: '/routers'
+      fullPath: '/routers'
+      preLoaderRoute: typeof AppRoutersRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/dashboard': {
       id: '/_app/dashboard'
@@ -188,6 +207,7 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppSplatRoute: typeof AppSplatRoute
   AppDashboardRoute: typeof AppDashboardRoute
+  AppRoutersRoute: typeof AppRoutersRoute
   AppClientsHotspotRoute: typeof AppClientsHotspotRoute
   AppClientsPppoeRoute: typeof AppClientsPppoeRoute
   AppClientsStaticRoute: typeof AppClientsStaticRoute
@@ -196,6 +216,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppSplatRoute: AppSplatRoute,
   AppDashboardRoute: AppDashboardRoute,
+  AppRoutersRoute: AppRoutersRoute,
   AppClientsHotspotRoute: AppClientsHotspotRoute,
   AppClientsPppoeRoute: AppClientsPppoeRoute,
   AppClientsStaticRoute: AppClientsStaticRoute,
@@ -211,12 +232,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
