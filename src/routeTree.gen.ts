@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppWelcomeRouteImport } from './routes/_app/welcome'
 import { Route as AppRoutersRouteImport } from './routes/_app/routers'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppSplatRouteImport } from './routes/_app/$'
@@ -32,6 +33,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppWelcomeRoute = AppWelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppRoutersRoute = AppRoutersRouteImport.update({
   id: '/routers',
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/$': typeof AppSplatRoute
   '/dashboard': typeof AppDashboardRoute
   '/routers': typeof AppRoutersRoute
+  '/welcome': typeof AppWelcomeRoute
   '/clients/hotspot': typeof AppClientsHotspotRoute
   '/clients/pppoe': typeof AppClientsPppoeRoute
   '/clients/static': typeof AppClientsStaticRoute
@@ -80,6 +87,7 @@ export interface FileRoutesByTo {
   '/$': typeof AppSplatRoute
   '/dashboard': typeof AppDashboardRoute
   '/routers': typeof AppRoutersRoute
+  '/welcome': typeof AppWelcomeRoute
   '/clients/hotspot': typeof AppClientsHotspotRoute
   '/clients/pppoe': typeof AppClientsPppoeRoute
   '/clients/static': typeof AppClientsStaticRoute
@@ -92,6 +100,7 @@ export interface FileRoutesById {
   '/_app/$': typeof AppSplatRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/routers': typeof AppRoutersRoute
+  '/_app/welcome': typeof AppWelcomeRoute
   '/_app/clients/hotspot': typeof AppClientsHotspotRoute
   '/_app/clients/pppoe': typeof AppClientsPppoeRoute
   '/_app/clients/static': typeof AppClientsStaticRoute
@@ -104,6 +113,7 @@ export interface FileRouteTypes {
     | '/$'
     | '/dashboard'
     | '/routers'
+    | '/welcome'
     | '/clients/hotspot'
     | '/clients/pppoe'
     | '/clients/static'
@@ -114,6 +124,7 @@ export interface FileRouteTypes {
     | '/$'
     | '/dashboard'
     | '/routers'
+    | '/welcome'
     | '/clients/hotspot'
     | '/clients/pppoe'
     | '/clients/static'
@@ -125,6 +136,7 @@ export interface FileRouteTypes {
     | '/_app/$'
     | '/_app/dashboard'
     | '/_app/routers'
+    | '/_app/welcome'
     | '/_app/clients/hotspot'
     | '/_app/clients/pppoe'
     | '/_app/clients/static'
@@ -158,6 +170,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_app/welcome': {
+      id: '/_app/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof AppWelcomeRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/routers': {
       id: '/_app/routers'
@@ -208,6 +227,7 @@ interface AppRouteChildren {
   AppSplatRoute: typeof AppSplatRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppRoutersRoute: typeof AppRoutersRoute
+  AppWelcomeRoute: typeof AppWelcomeRoute
   AppClientsHotspotRoute: typeof AppClientsHotspotRoute
   AppClientsPppoeRoute: typeof AppClientsPppoeRoute
   AppClientsStaticRoute: typeof AppClientsStaticRoute
@@ -217,6 +237,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppSplatRoute: AppSplatRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppRoutersRoute: AppRoutersRoute,
+  AppWelcomeRoute: AppWelcomeRoute,
   AppClientsHotspotRoute: AppClientsHotspotRoute,
   AppClientsPppoeRoute: AppClientsPppoeRoute,
   AppClientsStaticRoute: AppClientsStaticRoute,

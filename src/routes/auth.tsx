@@ -42,14 +42,14 @@ function AuthPage() {
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
+        emailRedirectTo: `${window.location.origin}/welcome`,
         data: { full_name: name },
       },
     });
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Account created!");
-    navigate({ to: "/dashboard" });
+    navigate({ to: "/welcome" });
   };
 
   return (
