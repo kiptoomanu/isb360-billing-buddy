@@ -22,6 +22,7 @@ export type Database = {
           full_name: string
           id: string
           ip_address: string | null
+          loyalty_points: number
           monthly_fee: number
           phone: string | null
           router_id: string | null
@@ -38,6 +39,7 @@ export type Database = {
           full_name: string
           id?: string
           ip_address?: string | null
+          loyalty_points?: number
           monthly_fee?: number
           phone?: string | null
           router_id?: string | null
@@ -54,6 +56,7 @@ export type Database = {
           full_name?: string
           id?: string
           ip_address?: string | null
+          loyalty_points?: number
           monthly_fee?: number
           phone?: string | null
           router_id?: string | null
@@ -76,6 +79,41 @@ export type Database = {
             columns: ["station_id"]
             isOneToOne: false
             referencedRelation: "stations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      loyalty_transactions: {
+        Row: {
+          client_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          points: number
+          reason: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          points: number
+          reason?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          points?: number
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loyalty_transactions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
             referencedColumns: ["id"]
           },
         ]
