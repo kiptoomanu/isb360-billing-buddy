@@ -33,6 +33,7 @@ type Client = {
   ip_address: string | null;
   expiry_date: string | null;
   router_id: string | null;
+  loyalty_points: number;
 };
 
 type RouterRow = { id: string; name: string };
@@ -129,13 +130,14 @@ export function ClientsPage({ type }: { type: ClientType }) {
                 <TableHead>IP</TableHead>
                 <TableHead>Router</TableHead>
                 <TableHead>Fee</TableHead>
+                <TableHead>Points</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={8} className="py-10 text-center text-sm text-muted-foreground">No clients yet. Add your first one.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={9} className="py-10 text-center text-sm text-muted-foreground">No clients yet. Add your first one.</TableCell></TableRow>
               ) : filtered.map((c) => {
                 const routerName = routers.find((r) => r.id === c.router_id)?.name ?? "—";
                 const isBusy = busyId === c.id;
@@ -147,6 +149,7 @@ export function ClientsPage({ type }: { type: ClientType }) {
                     <TableCell>{c.ip_address ?? "—"}</TableCell>
                     <TableCell className="text-xs">{routerName}</TableCell>
                     <TableCell>{Number(c.monthly_fee).toFixed(2)}</TableCell>
+                    <TableCell className="font-medium">{c.loyalty_points ?? 0}</TableCell>
                     <TableCell>
                       <Badge variant={c.status === "active" ? "default" : c.status === "expired" ? "destructive" : "secondary"}>{c.status}</Badge>
                     </TableCell>
