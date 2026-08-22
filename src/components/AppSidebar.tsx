@@ -13,6 +13,7 @@ import {
   TicketCheck,
   Package,
   Router as RouterIcon,
+  Award,
 } from "lucide-react";
 import {
   Sidebar,
