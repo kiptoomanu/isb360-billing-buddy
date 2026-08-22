@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.tg_apply_loyalty_points() FROM PUBLIC, anon, authenticated;

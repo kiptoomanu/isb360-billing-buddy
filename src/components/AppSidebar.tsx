@@ -13,6 +13,7 @@ import {
   TicketCheck,
   Package,
   Router as RouterIcon,
+  Award,
 } from "lucide-react";
 import {
   Sidebar,
@@ -37,6 +38,7 @@ const network: Item[] = [
   { title: "Static IP", url: "/clients/static", icon: Network },
   { title: "Hotspot", url: "/clients/hotspot", icon: Radio },
   { title: "MikroTik Routers", url: "/routers", icon: RouterIcon },
+  { title: "Loyalty Points", url: "/loyalty", icon: Award },
   { title: "TV Services", url: "/clients/tv", icon: Tv },
   { title: "Network Infrastructure", url: "/network/infra", icon: Server },
   { title: "Fiber Planning", url: "/network/fiber", icon: GitBranch },

@@ -14,6 +14,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppWelcomeRouteImport } from './routes/_app/welcome'
 import { Route as AppRoutersRouteImport } from './routes/_app/routers'
+import { Route as AppLoyaltyRouteImport } from './routes/_app/loyalty'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppSplatRouteImport } from './routes/_app/$'
 import { Route as AppClientsStaticRouteImport } from './routes/_app/clients.static'
@@ -42,6 +43,11 @@ const AppWelcomeRoute = AppWelcomeRouteImport.update({
 const AppRoutersRoute = AppRoutersRouteImport.update({
   id: '/routers',
   path: '/routers',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLoyaltyRoute = AppLoyaltyRouteImport.update({
+  id: '/loyalty',
+  path: '/loyalty',
   getParentRoute: () => AppRoute,
 } as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/$': typeof AppSplatRoute
   '/dashboard': typeof AppDashboardRoute
+  '/loyalty': typeof AppLoyaltyRoute
   '/routers': typeof AppRoutersRoute
   '/welcome': typeof AppWelcomeRoute
   '/clients/hotspot': typeof AppClientsHotspotRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/$': typeof AppSplatRoute
   '/dashboard': typeof AppDashboardRoute
+  '/loyalty': typeof AppLoyaltyRoute
   '/routers': typeof AppRoutersRoute
   '/welcome': typeof AppWelcomeRoute
   '/clients/hotspot': typeof AppClientsHotspotRoute
@@ -99,6 +107,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_app/$': typeof AppSplatRoute
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/loyalty': typeof AppLoyaltyRoute
   '/_app/routers': typeof AppRoutersRoute
   '/_app/welcome': typeof AppWelcomeRoute
   '/_app/clients/hotspot': typeof AppClientsHotspotRoute
@@ -112,6 +121,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/$'
     | '/dashboard'
+    | '/loyalty'
     | '/routers'
     | '/welcome'
     | '/clients/hotspot'
@@ -123,6 +133,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/$'
     | '/dashboard'
+    | '/loyalty'
     | '/routers'
     | '/welcome'
     | '/clients/hotspot'
@@ -135,6 +146,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_app/$'
     | '/_app/dashboard'
+    | '/_app/loyalty'
     | '/_app/routers'
     | '/_app/welcome'
     | '/_app/clients/hotspot'
@@ -185,6 +197,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRoutersRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/loyalty': {
+      id: '/_app/loyalty'
+      path: '/loyalty'
+      fullPath: '/loyalty'
+      preLoaderRoute: typeof AppLoyaltyRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/dashboard': {
       id: '/_app/dashboard'
       path: '/dashboard'
@@ -226,6 +245,7 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppSplatRoute: typeof AppSplatRoute
   AppDashboardRoute: typeof AppDashboardRoute
+  AppLoyaltyRoute: typeof AppLoyaltyRoute
   AppRoutersRoute: typeof AppRoutersRoute
   AppWelcomeRoute: typeof AppWelcomeRoute
   AppClientsHotspotRoute: typeof AppClientsHotspotRoute
@@ -236,6 +256,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppSplatRoute: AppSplatRoute,
   AppDashboardRoute: AppDashboardRoute,
+  AppLoyaltyRoute: AppLoyaltyRoute,
   AppRoutersRoute: AppRoutersRoute,
   AppWelcomeRoute: AppWelcomeRoute,
   AppClientsHotspotRoute: AppClientsHotspotRoute,
@@ -253,3 +274,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
