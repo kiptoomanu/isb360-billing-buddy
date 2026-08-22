@@ -150,10 +150,15 @@ export type Database = {
           created_at: string
           host: string
           id: string
+          last_seen_at: string | null
+          model: string | null
           name: string
           notes: string | null
           password: string
           port: number
+          provision_status: string
+          provisioned_at: string | null
+          services: string[]
           station_id: string | null
           updated_at: string
           use_https: boolean
@@ -163,10 +168,15 @@ export type Database = {
           created_at?: string
           host: string
           id?: string
+          last_seen_at?: string | null
+          model?: string | null
           name: string
           notes?: string | null
           password: string
           port?: number
+          provision_status?: string
+          provisioned_at?: string | null
+          services?: string[]
           station_id?: string | null
           updated_at?: string
           use_https?: boolean
@@ -176,10 +186,15 @@ export type Database = {
           created_at?: string
           host?: string
           id?: string
+          last_seen_at?: string | null
+          model?: string | null
           name?: string
           notes?: string | null
           password?: string
           port?: number
+          provision_status?: string
+          provisioned_at?: string | null
+          services?: string[]
           station_id?: string | null
           updated_at?: string
           use_https?: boolean
