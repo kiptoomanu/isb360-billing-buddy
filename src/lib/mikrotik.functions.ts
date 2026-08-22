@@ -62,9 +62,22 @@ export const testRouter = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ routerId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const router = await loadRouter(context.supabase, data.routerId);
-    const sys = await rosFetch(router, "/system/resource");
-    return { ok: true, identity: sys?.[0] ?? sys };
+    try {
+      const sys = await rosFetch(router, "/system/resource");
+      const info = Array.isArray(sys) ? sys[0] : sys;
+      await context.supabase.from("routers").update({
+        provision_status: "online",
+        last_seen_at: new Date().toISOString(),
+        model: info?.["board-name"] ?? null,
+      }).eq("id", data.routerId);
+      return { ok: true, identity: info };
+    } catch (e: any) {
+      await context.supabase.from("routers")
+        .update({ provision_status: "offline" }).eq("id", data.routerId);
+      throw e;
+    }
   });
+
 
 export const syncClientToRouter = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
