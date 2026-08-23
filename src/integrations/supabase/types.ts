@@ -25,6 +25,7 @@ export type Database = {
           loyalty_points: number
           monthly_fee: number
           phone: string | null
+          plan_id: string | null
           router_id: string | null
           station_id: string | null
           status: Database["public"]["Enums"]["client_status"]
@@ -42,6 +43,7 @@ export type Database = {
           loyalty_points?: number
           monthly_fee?: number
           phone?: string | null
+          plan_id?: string | null
           router_id?: string | null
           station_id?: string | null
           status?: Database["public"]["Enums"]["client_status"]
@@ -59,6 +61,7 @@ export type Database = {
           loyalty_points?: number
           monthly_fee?: number
           phone?: string | null
+          plan_id?: string | null
           router_id?: string | null
           station_id?: string | null
           status?: Database["public"]["Enums"]["client_status"]
@@ -67,6 +70,13 @@ export type Database = {
           username?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "clients_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "clients_router_id_fkey"
             columns: ["router_id"]
@@ -117,6 +127,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      plans: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          device_limit: number
+          download_kbps: number
+          id: string
+          name: string
+          price: number
+          type: Database["public"]["Enums"]["client_type"]
+          updated_at: string
+          upload_kbps: number
+          validity_days: number
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          device_limit?: number
+          download_kbps?: number
+          id?: string
+          name: string
+          price?: number
+          type?: Database["public"]["Enums"]["client_type"]
+          updated_at?: string
+          upload_kbps?: number
+          validity_days?: number
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          device_limit?: number
+          download_kbps?: number
+          id?: string
+          name?: string
+          price?: number
+          type?: Database["public"]["Enums"]["client_type"]
+          updated_at?: string
+          upload_kbps?: number
+          validity_days?: number
+        }
+        Relationships: []
       }
       profiles: {
         Row: {

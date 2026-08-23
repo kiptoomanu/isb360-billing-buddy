@@ -14,6 +14,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppWelcomeRouteImport } from './routes/_app/welcome'
 import { Route as AppRoutersRouteImport } from './routes/_app/routers'
+import { Route as AppPlansRouteImport } from './routes/_app/plans'
 import { Route as AppLoyaltyRouteImport } from './routes/_app/loyalty'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppSplatRouteImport } from './routes/_app/$'
@@ -43,6 +44,11 @@ const AppWelcomeRoute = AppWelcomeRouteImport.update({
 const AppRoutersRoute = AppRoutersRouteImport.update({
   id: '/routers',
   path: '/routers',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPlansRoute = AppPlansRouteImport.update({
+  id: '/plans',
+  path: '/plans',
   getParentRoute: () => AppRoute,
 } as any)
 const AppLoyaltyRoute = AppLoyaltyRouteImport.update({
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/$': typeof AppSplatRoute
   '/dashboard': typeof AppDashboardRoute
   '/loyalty': typeof AppLoyaltyRoute
+  '/plans': typeof AppPlansRoute
   '/routers': typeof AppRoutersRoute
   '/welcome': typeof AppWelcomeRoute
   '/clients/hotspot': typeof AppClientsHotspotRoute
@@ -94,6 +101,7 @@ export interface FileRoutesByTo {
   '/$': typeof AppSplatRoute
   '/dashboard': typeof AppDashboardRoute
   '/loyalty': typeof AppLoyaltyRoute
+  '/plans': typeof AppPlansRoute
   '/routers': typeof AppRoutersRoute
   '/welcome': typeof AppWelcomeRoute
   '/clients/hotspot': typeof AppClientsHotspotRoute
@@ -108,6 +116,7 @@ export interface FileRoutesById {
   '/_app/$': typeof AppSplatRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/loyalty': typeof AppLoyaltyRoute
+  '/_app/plans': typeof AppPlansRoute
   '/_app/routers': typeof AppRoutersRoute
   '/_app/welcome': typeof AppWelcomeRoute
   '/_app/clients/hotspot': typeof AppClientsHotspotRoute
@@ -122,6 +131,7 @@ export interface FileRouteTypes {
     | '/$'
     | '/dashboard'
     | '/loyalty'
+    | '/plans'
     | '/routers'
     | '/welcome'
     | '/clients/hotspot'
@@ -134,6 +144,7 @@ export interface FileRouteTypes {
     | '/$'
     | '/dashboard'
     | '/loyalty'
+    | '/plans'
     | '/routers'
     | '/welcome'
     | '/clients/hotspot'
@@ -147,6 +158,7 @@ export interface FileRouteTypes {
     | '/_app/$'
     | '/_app/dashboard'
     | '/_app/loyalty'
+    | '/_app/plans'
     | '/_app/routers'
     | '/_app/welcome'
     | '/_app/clients/hotspot'
@@ -195,6 +207,13 @@ declare module '@tanstack/react-router' {
       path: '/routers'
       fullPath: '/routers'
       preLoaderRoute: typeof AppRoutersRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/plans': {
+      id: '/_app/plans'
+      path: '/plans'
+      fullPath: '/plans'
+      preLoaderRoute: typeof AppPlansRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/loyalty': {
@@ -246,6 +265,7 @@ interface AppRouteChildren {
   AppSplatRoute: typeof AppSplatRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppLoyaltyRoute: typeof AppLoyaltyRoute
+  AppPlansRoute: typeof AppPlansRoute
   AppRoutersRoute: typeof AppRoutersRoute
   AppWelcomeRoute: typeof AppWelcomeRoute
   AppClientsHotspotRoute: typeof AppClientsHotspotRoute
@@ -257,6 +277,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppSplatRoute: AppSplatRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppLoyaltyRoute: AppLoyaltyRoute,
+  AppPlansRoute: AppPlansRoute,
   AppRoutersRoute: AppRoutersRoute,
   AppWelcomeRoute: AppWelcomeRoute,
   AppClientsHotspotRoute: AppClientsHotspotRoute,
