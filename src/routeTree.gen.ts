@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppWelcomeRouteImport } from './routes/_app/welcome'
+import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppRoutersRouteImport } from './routes/_app/routers'
 import { Route as AppPlansRouteImport } from './routes/_app/plans'
 import { Route as AppLoyaltyRouteImport } from './routes/_app/loyalty'
@@ -39,6 +40,11 @@ const IndexRoute = IndexRouteImport.update({
 const AppWelcomeRoute = AppWelcomeRouteImport.update({
   id: '/welcome',
   path: '/welcome',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => AppRoute,
 } as any)
 const AppRoutersRoute = AppRoutersRouteImport.update({
@@ -90,6 +96,7 @@ export interface FileRoutesByFullPath {
   '/loyalty': typeof AppLoyaltyRoute
   '/plans': typeof AppPlansRoute
   '/routers': typeof AppRoutersRoute
+  '/settings': typeof AppSettingsRoute
   '/welcome': typeof AppWelcomeRoute
   '/clients/hotspot': typeof AppClientsHotspotRoute
   '/clients/pppoe': typeof AppClientsPppoeRoute
@@ -103,6 +110,7 @@ export interface FileRoutesByTo {
   '/loyalty': typeof AppLoyaltyRoute
   '/plans': typeof AppPlansRoute
   '/routers': typeof AppRoutersRoute
+  '/settings': typeof AppSettingsRoute
   '/welcome': typeof AppWelcomeRoute
   '/clients/hotspot': typeof AppClientsHotspotRoute
   '/clients/pppoe': typeof AppClientsPppoeRoute
@@ -118,6 +126,7 @@ export interface FileRoutesById {
   '/_app/loyalty': typeof AppLoyaltyRoute
   '/_app/plans': typeof AppPlansRoute
   '/_app/routers': typeof AppRoutersRoute
+  '/_app/settings': typeof AppSettingsRoute
   '/_app/welcome': typeof AppWelcomeRoute
   '/_app/clients/hotspot': typeof AppClientsHotspotRoute
   '/_app/clients/pppoe': typeof AppClientsPppoeRoute
@@ -133,6 +142,7 @@ export interface FileRouteTypes {
     | '/loyalty'
     | '/plans'
     | '/routers'
+    | '/settings'
     | '/welcome'
     | '/clients/hotspot'
     | '/clients/pppoe'
@@ -146,6 +156,7 @@ export interface FileRouteTypes {
     | '/loyalty'
     | '/plans'
     | '/routers'
+    | '/settings'
     | '/welcome'
     | '/clients/hotspot'
     | '/clients/pppoe'
@@ -160,6 +171,7 @@ export interface FileRouteTypes {
     | '/_app/loyalty'
     | '/_app/plans'
     | '/_app/routers'
+    | '/_app/settings'
     | '/_app/welcome'
     | '/_app/clients/hotspot'
     | '/_app/clients/pppoe'
@@ -200,6 +212,13 @@ declare module '@tanstack/react-router' {
       path: '/welcome'
       fullPath: '/welcome'
       preLoaderRoute: typeof AppWelcomeRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/settings': {
+      id: '/_app/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/routers': {
@@ -267,6 +286,7 @@ interface AppRouteChildren {
   AppLoyaltyRoute: typeof AppLoyaltyRoute
   AppPlansRoute: typeof AppPlansRoute
   AppRoutersRoute: typeof AppRoutersRoute
+  AppSettingsRoute: typeof AppSettingsRoute
   AppWelcomeRoute: typeof AppWelcomeRoute
   AppClientsHotspotRoute: typeof AppClientsHotspotRoute
   AppClientsPppoeRoute: typeof AppClientsPppoeRoute
@@ -279,6 +299,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppLoyaltyRoute: AppLoyaltyRoute,
   AppPlansRoute: AppPlansRoute,
   AppRoutersRoute: AppRoutersRoute,
+  AppSettingsRoute: AppSettingsRoute,
   AppWelcomeRoute: AppWelcomeRoute,
   AppClientsHotspotRoute: AppClientsHotspotRoute,
   AppClientsPppoeRoute: AppClientsPppoeRoute,
