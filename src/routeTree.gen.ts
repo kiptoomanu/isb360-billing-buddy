@@ -20,6 +20,7 @@ import { Route as AppLoyaltyRouteImport } from './routes/_app/loyalty'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppSplatRouteImport } from './routes/_app/$'
 import { Route as AppSettingsIndexRouteImport } from './routes/_app/settings.index'
+import { Route as AppSettingsBrandingRouteImport } from './routes/_app/settings.branding'
 import { Route as AppClientsStaticRouteImport } from './routes/_app/clients.static'
 import { Route as AppClientsPppoeRouteImport } from './routes/_app/clients.pppoe'
 import { Route as AppClientsHotspotRouteImport } from './routes/_app/clients.hotspot'
@@ -78,6 +79,11 @@ const AppSettingsIndexRoute = AppSettingsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppSettingsRoute,
 } as any)
+const AppSettingsBrandingRoute = AppSettingsBrandingRouteImport.update({
+  id: '/branding',
+  path: '/branding',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
 const AppClientsStaticRoute = AppClientsStaticRouteImport.update({
   id: '/clients/static',
   path: '/clients/static',
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/clients/hotspot': typeof AppClientsHotspotRoute
   '/clients/pppoe': typeof AppClientsPppoeRoute
   '/clients/static': typeof AppClientsStaticRoute
+  '/settings/branding': typeof AppSettingsBrandingRoute
   '/settings/': typeof AppSettingsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -121,6 +128,7 @@ export interface FileRoutesByTo {
   '/clients/hotspot': typeof AppClientsHotspotRoute
   '/clients/pppoe': typeof AppClientsPppoeRoute
   '/clients/static': typeof AppClientsStaticRoute
+  '/settings/branding': typeof AppSettingsBrandingRoute
   '/settings': typeof AppSettingsIndexRoute
 }
 export interface FileRoutesById {
@@ -138,6 +146,7 @@ export interface FileRoutesById {
   '/_app/clients/hotspot': typeof AppClientsHotspotRoute
   '/_app/clients/pppoe': typeof AppClientsPppoeRoute
   '/_app/clients/static': typeof AppClientsStaticRoute
+  '/_app/settings/branding': typeof AppSettingsBrandingRoute
   '/_app/settings/': typeof AppSettingsIndexRoute
 }
 export interface FileRouteTypes {
@@ -155,6 +164,7 @@ export interface FileRouteTypes {
     | '/clients/hotspot'
     | '/clients/pppoe'
     | '/clients/static'
+    | '/settings/branding'
     | '/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -169,6 +179,7 @@ export interface FileRouteTypes {
     | '/clients/hotspot'
     | '/clients/pppoe'
     | '/clients/static'
+    | '/settings/branding'
     | '/settings'
   id:
     | '__root__'
@@ -185,6 +196,7 @@ export interface FileRouteTypes {
     | '/_app/clients/hotspot'
     | '/_app/clients/pppoe'
     | '/_app/clients/static'
+    | '/_app/settings/branding'
     | '/_app/settings/'
   fileRoutesById: FileRoutesById
 }
@@ -273,6 +285,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsIndexRouteImport
       parentRoute: typeof AppSettingsRoute
     }
+    '/_app/settings/branding': {
+      id: '/_app/settings/branding'
+      path: '/branding'
+      fullPath: '/settings/branding'
+      preLoaderRoute: typeof AppSettingsBrandingRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
     '/_app/clients/static': {
       id: '/_app/clients/static'
       path: '/clients/static'
@@ -298,10 +317,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppSettingsRouteChildren {
+  AppSettingsBrandingRoute: typeof AppSettingsBrandingRoute
   AppSettingsIndexRoute: typeof AppSettingsIndexRoute
 }
 
 const AppSettingsRouteChildren: AppSettingsRouteChildren = {
+  AppSettingsBrandingRoute: AppSettingsBrandingRoute,
   AppSettingsIndexRoute: AppSettingsIndexRoute,
 }
 
