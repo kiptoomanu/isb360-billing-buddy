@@ -21,6 +21,7 @@ import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppSplatRouteImport } from './routes/_app/$'
 import { Route as AppSettingsIndexRouteImport } from './routes/_app/settings.index'
 import { Route as AppSettingsPppoeRouteImport } from './routes/_app/settings.pppoe'
+import { Route as AppSettingsPaymentsRouteImport } from './routes/_app/settings.payments'
 import { Route as AppSettingsHotspotRouteImport } from './routes/_app/settings.hotspot'
 import { Route as AppSettingsDomainRouteImport } from './routes/_app/settings.domain'
 import { Route as AppSettingsBrandingRouteImport } from './routes/_app/settings.branding'
@@ -87,6 +88,11 @@ const AppSettingsPppoeRoute = AppSettingsPppoeRouteImport.update({
   path: '/pppoe',
   getParentRoute: () => AppSettingsRoute,
 } as any)
+const AppSettingsPaymentsRoute = AppSettingsPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
 const AppSettingsHotspotRoute = AppSettingsHotspotRouteImport.update({
   id: '/hotspot',
   path: '/hotspot',
@@ -134,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/settings/branding': typeof AppSettingsBrandingRoute
   '/settings/domain': typeof AppSettingsDomainRoute
   '/settings/hotspot': typeof AppSettingsHotspotRoute
+  '/settings/payments': typeof AppSettingsPaymentsRoute
   '/settings/pppoe': typeof AppSettingsPppoeRoute
   '/settings/': typeof AppSettingsIndexRoute
 }
@@ -152,6 +159,7 @@ export interface FileRoutesByTo {
   '/settings/branding': typeof AppSettingsBrandingRoute
   '/settings/domain': typeof AppSettingsDomainRoute
   '/settings/hotspot': typeof AppSettingsHotspotRoute
+  '/settings/payments': typeof AppSettingsPaymentsRoute
   '/settings/pppoe': typeof AppSettingsPppoeRoute
   '/settings': typeof AppSettingsIndexRoute
 }
@@ -173,6 +181,7 @@ export interface FileRoutesById {
   '/_app/settings/branding': typeof AppSettingsBrandingRoute
   '/_app/settings/domain': typeof AppSettingsDomainRoute
   '/_app/settings/hotspot': typeof AppSettingsHotspotRoute
+  '/_app/settings/payments': typeof AppSettingsPaymentsRoute
   '/_app/settings/pppoe': typeof AppSettingsPppoeRoute
   '/_app/settings/': typeof AppSettingsIndexRoute
 }
@@ -194,6 +203,7 @@ export interface FileRouteTypes {
     | '/settings/branding'
     | '/settings/domain'
     | '/settings/hotspot'
+    | '/settings/payments'
     | '/settings/pppoe'
     | '/settings/'
   fileRoutesByTo: FileRoutesByTo
@@ -212,6 +222,7 @@ export interface FileRouteTypes {
     | '/settings/branding'
     | '/settings/domain'
     | '/settings/hotspot'
+    | '/settings/payments'
     | '/settings/pppoe'
     | '/settings'
   id:
@@ -232,6 +243,7 @@ export interface FileRouteTypes {
     | '/_app/settings/branding'
     | '/_app/settings/domain'
     | '/_app/settings/hotspot'
+    | '/_app/settings/payments'
     | '/_app/settings/pppoe'
     | '/_app/settings/'
   fileRoutesById: FileRoutesById
@@ -328,6 +340,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsPppoeRouteImport
       parentRoute: typeof AppSettingsRoute
     }
+    '/_app/settings/payments': {
+      id: '/_app/settings/payments'
+      path: '/payments'
+      fullPath: '/settings/payments'
+      preLoaderRoute: typeof AppSettingsPaymentsRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
     '/_app/settings/hotspot': {
       id: '/_app/settings/hotspot'
       path: '/hotspot'
@@ -377,6 +396,7 @@ interface AppSettingsRouteChildren {
   AppSettingsBrandingRoute: typeof AppSettingsBrandingRoute
   AppSettingsDomainRoute: typeof AppSettingsDomainRoute
   AppSettingsHotspotRoute: typeof AppSettingsHotspotRoute
+  AppSettingsPaymentsRoute: typeof AppSettingsPaymentsRoute
   AppSettingsPppoeRoute: typeof AppSettingsPppoeRoute
   AppSettingsIndexRoute: typeof AppSettingsIndexRoute
 }
@@ -385,6 +405,7 @@ const AppSettingsRouteChildren: AppSettingsRouteChildren = {
   AppSettingsBrandingRoute: AppSettingsBrandingRoute,
   AppSettingsDomainRoute: AppSettingsDomainRoute,
   AppSettingsHotspotRoute: AppSettingsHotspotRoute,
+  AppSettingsPaymentsRoute: AppSettingsPaymentsRoute,
   AppSettingsPppoeRoute: AppSettingsPppoeRoute,
   AppSettingsIndexRoute: AppSettingsIndexRoute,
 }
