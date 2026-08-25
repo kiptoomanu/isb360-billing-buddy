@@ -20,6 +20,7 @@ import { Route as AppLoyaltyRouteImport } from './routes/_app/loyalty'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppSplatRouteImport } from './routes/_app/$'
 import { Route as AppSettingsIndexRouteImport } from './routes/_app/settings.index'
+import { Route as AppSettingsWhatsappRouteImport } from './routes/_app/settings.whatsapp'
 import { Route as AppSettingsPppoeRouteImport } from './routes/_app/settings.pppoe'
 import { Route as AppSettingsPaymentsRouteImport } from './routes/_app/settings.payments'
 import { Route as AppSettingsHotspotRouteImport } from './routes/_app/settings.hotspot'
@@ -83,6 +84,11 @@ const AppSplatRoute = AppSplatRouteImport.update({
 const AppSettingsIndexRoute = AppSettingsIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
+const AppSettingsWhatsappRoute = AppSettingsWhatsappRouteImport.update({
+  id: '/whatsapp',
+  path: '/whatsapp',
   getParentRoute: () => AppSettingsRoute,
 } as any)
 const AppSettingsPppoeRoute = AppSettingsPppoeRouteImport.update({
@@ -157,6 +163,7 @@ export interface FileRoutesByFullPath {
   '/settings/hotspot': typeof AppSettingsHotspotRoute
   '/settings/payments': typeof AppSettingsPaymentsRoute
   '/settings/pppoe': typeof AppSettingsPppoeRoute
+  '/settings/whatsapp': typeof AppSettingsWhatsappRoute
   '/settings/': typeof AppSettingsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -178,6 +185,7 @@ export interface FileRoutesByTo {
   '/settings/hotspot': typeof AppSettingsHotspotRoute
   '/settings/payments': typeof AppSettingsPaymentsRoute
   '/settings/pppoe': typeof AppSettingsPppoeRoute
+  '/settings/whatsapp': typeof AppSettingsWhatsappRoute
   '/settings': typeof AppSettingsIndexRoute
 }
 export interface FileRoutesById {
@@ -202,6 +210,7 @@ export interface FileRoutesById {
   '/_app/settings/hotspot': typeof AppSettingsHotspotRoute
   '/_app/settings/payments': typeof AppSettingsPaymentsRoute
   '/_app/settings/pppoe': typeof AppSettingsPppoeRoute
+  '/_app/settings/whatsapp': typeof AppSettingsWhatsappRoute
   '/_app/settings/': typeof AppSettingsIndexRoute
 }
 export interface FileRouteTypes {
@@ -226,6 +235,7 @@ export interface FileRouteTypes {
     | '/settings/hotspot'
     | '/settings/payments'
     | '/settings/pppoe'
+    | '/settings/whatsapp'
     | '/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -247,6 +257,7 @@ export interface FileRouteTypes {
     | '/settings/hotspot'
     | '/settings/payments'
     | '/settings/pppoe'
+    | '/settings/whatsapp'
     | '/settings'
   id:
     | '__root__'
@@ -270,6 +281,7 @@ export interface FileRouteTypes {
     | '/_app/settings/hotspot'
     | '/_app/settings/payments'
     | '/_app/settings/pppoe'
+    | '/_app/settings/whatsapp'
     | '/_app/settings/'
   fileRoutesById: FileRoutesById
 }
@@ -358,6 +370,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsIndexRouteImport
       parentRoute: typeof AppSettingsRoute
     }
+    '/_app/settings/whatsapp': {
+      id: '/_app/settings/whatsapp'
+      path: '/whatsapp'
+      fullPath: '/settings/whatsapp'
+      preLoaderRoute: typeof AppSettingsWhatsappRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
     '/_app/settings/pppoe': {
       id: '/_app/settings/pppoe'
       path: '/pppoe'
@@ -439,6 +458,7 @@ interface AppSettingsRouteChildren {
   AppSettingsHotspotRoute: typeof AppSettingsHotspotRoute
   AppSettingsPaymentsRoute: typeof AppSettingsPaymentsRoute
   AppSettingsPppoeRoute: typeof AppSettingsPppoeRoute
+  AppSettingsWhatsappRoute: typeof AppSettingsWhatsappRoute
   AppSettingsIndexRoute: typeof AppSettingsIndexRoute
 }
 
@@ -450,6 +470,7 @@ const AppSettingsRouteChildren: AppSettingsRouteChildren = {
   AppSettingsHotspotRoute: AppSettingsHotspotRoute,
   AppSettingsPaymentsRoute: AppSettingsPaymentsRoute,
   AppSettingsPppoeRoute: AppSettingsPppoeRoute,
+  AppSettingsWhatsappRoute: AppSettingsWhatsappRoute,
   AppSettingsIndexRoute: AppSettingsIndexRoute,
 }
 
