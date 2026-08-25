@@ -23,6 +23,7 @@ import { Route as AppSettingsIndexRouteImport } from './routes/_app/settings.ind
 import { Route as AppSettingsPppoeRouteImport } from './routes/_app/settings.pppoe'
 import { Route as AppSettingsPaymentsRouteImport } from './routes/_app/settings.payments'
 import { Route as AppSettingsHotspotRouteImport } from './routes/_app/settings.hotspot'
+import { Route as AppSettingsEmailRouteImport } from './routes/_app/settings.email'
 import { Route as AppSettingsDomainRouteImport } from './routes/_app/settings.domain'
 import { Route as AppSettingsCommunicationsRouteImport } from './routes/_app/settings.communications'
 import { Route as AppSettingsBrandingRouteImport } from './routes/_app/settings.branding'
@@ -99,6 +100,11 @@ const AppSettingsHotspotRoute = AppSettingsHotspotRouteImport.update({
   path: '/hotspot',
   getParentRoute: () => AppSettingsRoute,
 } as any)
+const AppSettingsEmailRoute = AppSettingsEmailRouteImport.update({
+  id: '/email',
+  path: '/email',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
 const AppSettingsDomainRoute = AppSettingsDomainRouteImport.update({
   id: '/domain',
   path: '/domain',
@@ -147,6 +153,7 @@ export interface FileRoutesByFullPath {
   '/settings/branding': typeof AppSettingsBrandingRoute
   '/settings/communications': typeof AppSettingsCommunicationsRoute
   '/settings/domain': typeof AppSettingsDomainRoute
+  '/settings/email': typeof AppSettingsEmailRoute
   '/settings/hotspot': typeof AppSettingsHotspotRoute
   '/settings/payments': typeof AppSettingsPaymentsRoute
   '/settings/pppoe': typeof AppSettingsPppoeRoute
@@ -167,6 +174,7 @@ export interface FileRoutesByTo {
   '/settings/branding': typeof AppSettingsBrandingRoute
   '/settings/communications': typeof AppSettingsCommunicationsRoute
   '/settings/domain': typeof AppSettingsDomainRoute
+  '/settings/email': typeof AppSettingsEmailRoute
   '/settings/hotspot': typeof AppSettingsHotspotRoute
   '/settings/payments': typeof AppSettingsPaymentsRoute
   '/settings/pppoe': typeof AppSettingsPppoeRoute
@@ -190,6 +198,7 @@ export interface FileRoutesById {
   '/_app/settings/branding': typeof AppSettingsBrandingRoute
   '/_app/settings/communications': typeof AppSettingsCommunicationsRoute
   '/_app/settings/domain': typeof AppSettingsDomainRoute
+  '/_app/settings/email': typeof AppSettingsEmailRoute
   '/_app/settings/hotspot': typeof AppSettingsHotspotRoute
   '/_app/settings/payments': typeof AppSettingsPaymentsRoute
   '/_app/settings/pppoe': typeof AppSettingsPppoeRoute
@@ -213,6 +222,7 @@ export interface FileRouteTypes {
     | '/settings/branding'
     | '/settings/communications'
     | '/settings/domain'
+    | '/settings/email'
     | '/settings/hotspot'
     | '/settings/payments'
     | '/settings/pppoe'
@@ -233,6 +243,7 @@ export interface FileRouteTypes {
     | '/settings/branding'
     | '/settings/communications'
     | '/settings/domain'
+    | '/settings/email'
     | '/settings/hotspot'
     | '/settings/payments'
     | '/settings/pppoe'
@@ -255,6 +266,7 @@ export interface FileRouteTypes {
     | '/_app/settings/branding'
     | '/_app/settings/communications'
     | '/_app/settings/domain'
+    | '/_app/settings/email'
     | '/_app/settings/hotspot'
     | '/_app/settings/payments'
     | '/_app/settings/pppoe'
@@ -367,6 +379,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsHotspotRouteImport
       parentRoute: typeof AppSettingsRoute
     }
+    '/_app/settings/email': {
+      id: '/_app/settings/email'
+      path: '/email'
+      fullPath: '/settings/email'
+      preLoaderRoute: typeof AppSettingsEmailRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
     '/_app/settings/domain': {
       id: '/_app/settings/domain'
       path: '/domain'
@@ -416,6 +435,7 @@ interface AppSettingsRouteChildren {
   AppSettingsBrandingRoute: typeof AppSettingsBrandingRoute
   AppSettingsCommunicationsRoute: typeof AppSettingsCommunicationsRoute
   AppSettingsDomainRoute: typeof AppSettingsDomainRoute
+  AppSettingsEmailRoute: typeof AppSettingsEmailRoute
   AppSettingsHotspotRoute: typeof AppSettingsHotspotRoute
   AppSettingsPaymentsRoute: typeof AppSettingsPaymentsRoute
   AppSettingsPppoeRoute: typeof AppSettingsPppoeRoute
@@ -426,6 +446,7 @@ const AppSettingsRouteChildren: AppSettingsRouteChildren = {
   AppSettingsBrandingRoute: AppSettingsBrandingRoute,
   AppSettingsCommunicationsRoute: AppSettingsCommunicationsRoute,
   AppSettingsDomainRoute: AppSettingsDomainRoute,
+  AppSettingsEmailRoute: AppSettingsEmailRoute,
   AppSettingsHotspotRoute: AppSettingsHotspotRoute,
   AppSettingsPaymentsRoute: AppSettingsPaymentsRoute,
   AppSettingsPppoeRoute: AppSettingsPppoeRoute,
