@@ -23,6 +23,7 @@ import { Route as AppSettingsIndexRouteImport } from './routes/_app/settings.ind
 import { Route as AppSettingsWhatsappRouteImport } from './routes/_app/settings.whatsapp'
 import { Route as AppSettingsPppoeRouteImport } from './routes/_app/settings.pppoe'
 import { Route as AppSettingsPaymentsRouteImport } from './routes/_app/settings.payments'
+import { Route as AppSettingsPagebuilderRouteImport } from './routes/_app/settings.pagebuilder'
 import { Route as AppSettingsHotspotRouteImport } from './routes/_app/settings.hotspot'
 import { Route as AppSettingsEmailRouteImport } from './routes/_app/settings.email'
 import { Route as AppSettingsDomainRouteImport } from './routes/_app/settings.domain'
@@ -101,6 +102,11 @@ const AppSettingsPaymentsRoute = AppSettingsPaymentsRouteImport.update({
   path: '/payments',
   getParentRoute: () => AppSettingsRoute,
 } as any)
+const AppSettingsPagebuilderRoute = AppSettingsPagebuilderRouteImport.update({
+  id: '/pagebuilder',
+  path: '/pagebuilder',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
 const AppSettingsHotspotRoute = AppSettingsHotspotRouteImport.update({
   id: '/hotspot',
   path: '/hotspot',
@@ -161,6 +167,7 @@ export interface FileRoutesByFullPath {
   '/settings/domain': typeof AppSettingsDomainRoute
   '/settings/email': typeof AppSettingsEmailRoute
   '/settings/hotspot': typeof AppSettingsHotspotRoute
+  '/settings/pagebuilder': typeof AppSettingsPagebuilderRoute
   '/settings/payments': typeof AppSettingsPaymentsRoute
   '/settings/pppoe': typeof AppSettingsPppoeRoute
   '/settings/whatsapp': typeof AppSettingsWhatsappRoute
@@ -183,6 +190,7 @@ export interface FileRoutesByTo {
   '/settings/domain': typeof AppSettingsDomainRoute
   '/settings/email': typeof AppSettingsEmailRoute
   '/settings/hotspot': typeof AppSettingsHotspotRoute
+  '/settings/pagebuilder': typeof AppSettingsPagebuilderRoute
   '/settings/payments': typeof AppSettingsPaymentsRoute
   '/settings/pppoe': typeof AppSettingsPppoeRoute
   '/settings/whatsapp': typeof AppSettingsWhatsappRoute
@@ -208,6 +216,7 @@ export interface FileRoutesById {
   '/_app/settings/domain': typeof AppSettingsDomainRoute
   '/_app/settings/email': typeof AppSettingsEmailRoute
   '/_app/settings/hotspot': typeof AppSettingsHotspotRoute
+  '/_app/settings/pagebuilder': typeof AppSettingsPagebuilderRoute
   '/_app/settings/payments': typeof AppSettingsPaymentsRoute
   '/_app/settings/pppoe': typeof AppSettingsPppoeRoute
   '/_app/settings/whatsapp': typeof AppSettingsWhatsappRoute
@@ -233,6 +242,7 @@ export interface FileRouteTypes {
     | '/settings/domain'
     | '/settings/email'
     | '/settings/hotspot'
+    | '/settings/pagebuilder'
     | '/settings/payments'
     | '/settings/pppoe'
     | '/settings/whatsapp'
@@ -255,6 +265,7 @@ export interface FileRouteTypes {
     | '/settings/domain'
     | '/settings/email'
     | '/settings/hotspot'
+    | '/settings/pagebuilder'
     | '/settings/payments'
     | '/settings/pppoe'
     | '/settings/whatsapp'
@@ -279,6 +290,7 @@ export interface FileRouteTypes {
     | '/_app/settings/domain'
     | '/_app/settings/email'
     | '/_app/settings/hotspot'
+    | '/_app/settings/pagebuilder'
     | '/_app/settings/payments'
     | '/_app/settings/pppoe'
     | '/_app/settings/whatsapp'
@@ -391,6 +403,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsPaymentsRouteImport
       parentRoute: typeof AppSettingsRoute
     }
+    '/_app/settings/pagebuilder': {
+      id: '/_app/settings/pagebuilder'
+      path: '/pagebuilder'
+      fullPath: '/settings/pagebuilder'
+      preLoaderRoute: typeof AppSettingsPagebuilderRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
     '/_app/settings/hotspot': {
       id: '/_app/settings/hotspot'
       path: '/hotspot'
@@ -456,6 +475,7 @@ interface AppSettingsRouteChildren {
   AppSettingsDomainRoute: typeof AppSettingsDomainRoute
   AppSettingsEmailRoute: typeof AppSettingsEmailRoute
   AppSettingsHotspotRoute: typeof AppSettingsHotspotRoute
+  AppSettingsPagebuilderRoute: typeof AppSettingsPagebuilderRoute
   AppSettingsPaymentsRoute: typeof AppSettingsPaymentsRoute
   AppSettingsPppoeRoute: typeof AppSettingsPppoeRoute
   AppSettingsWhatsappRoute: typeof AppSettingsWhatsappRoute
@@ -468,6 +488,7 @@ const AppSettingsRouteChildren: AppSettingsRouteChildren = {
   AppSettingsDomainRoute: AppSettingsDomainRoute,
   AppSettingsEmailRoute: AppSettingsEmailRoute,
   AppSettingsHotspotRoute: AppSettingsHotspotRoute,
+  AppSettingsPagebuilderRoute: AppSettingsPagebuilderRoute,
   AppSettingsPaymentsRoute: AppSettingsPaymentsRoute,
   AppSettingsPppoeRoute: AppSettingsPppoeRoute,
   AppSettingsWhatsappRoute: AppSettingsWhatsappRoute,
