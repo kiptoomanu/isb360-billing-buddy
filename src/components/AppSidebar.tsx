@@ -55,7 +55,11 @@ const finance: Item[] = [
   { title: "Support Tickets", url: "/finance/tickets", icon: TicketCheck },
 ];
 
-const ops: Item[] = [{ title: "Inventory", url: "/ops/inventory", icon: Package }];
+const ops: Item[] = [
+  { title: "Inventory", url: "/ops/inventory", icon: Package },
+  { title: "Settings", url: "/settings/branding", icon: Settings },
+];
+
 
 export function AppSidebar() {
   const { state } = useSidebar();
