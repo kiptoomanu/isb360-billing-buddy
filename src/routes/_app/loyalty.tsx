@@ -15,8 +15,11 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LoyaltySettings } from "@/components/loyalty/LoyaltySettings";
 import { Award, Gift, Search, Trophy } from "lucide-react";
 import { toast } from "sonner";
+
 
 type ClientRow = {
   id: string;
@@ -81,7 +84,19 @@ function LoyaltyPage() {
         </Dialog>
       </div>
 
+      <Tabs defaultValue="members">
+        <TabsList>
+          <TabsTrigger value="members">Members &amp; activity</TabsTrigger>
+          <TabsTrigger value="settings">Settings &amp; rewards</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="settings" className="pt-4">
+          <LoyaltySettings />
+        </TabsContent>
+
+        <TabsContent value="members" className="space-y-4 pt-4">
       <Card className="p-4">
+
         <div className="relative mb-3 max-w-sm">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search clients..." className="pl-9" />
@@ -148,7 +163,10 @@ function LoyaltyPage() {
           </Table>
         </div>
       </Card>
+        </TabsContent>
+      </Tabs>
     </div>
+
   );
 }
 
