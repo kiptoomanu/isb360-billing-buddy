@@ -15,8 +15,11 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LoyaltySettings } from "@/components/loyalty/LoyaltySettings";
 import { Award, Gift, Search, Trophy } from "lucide-react";
 import { toast } from "sonner";
+
 
 type ClientRow = {
   id: string;
