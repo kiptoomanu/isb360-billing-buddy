@@ -160,7 +160,10 @@ function LoyaltyPage() {
           </Table>
         </div>
       </Card>
+        </TabsContent>
+      </Tabs>
     </div>
+
   );
 }
 
