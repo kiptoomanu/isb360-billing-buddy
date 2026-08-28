@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
-  Palette, Globe, Network, Wifi, CreditCard, MessageSquare, Mail, Phone,
+  Palette, Globe, Network, Wifi, CreditCard, MessageSquare, Mail, Phone, LayoutGrid,
 } from "lucide-react";
 
 const tabs = [
@@ -12,11 +12,13 @@ const tabs = [
   { title: "Domain", url: "/settings/domain", icon: Globe },
   { title: "PPPoE", url: "/settings/pppoe", icon: Network },
   { title: "Hotspot", url: "/settings/hotspot", icon: Wifi },
+  { title: "Page Builder", url: "/settings/pagebuilder", icon: LayoutGrid },
   { title: "Payments", url: "/settings/payments", icon: CreditCard },
   { title: "Communications", url: "/settings/communications", icon: MessageSquare },
   { title: "Email", url: "/settings/email", icon: Mail },
   { title: "WhatsApp", url: "/settings/whatsapp", icon: Phone },
 ] as const;
+
 
 export function SettingsTabs() {
   const path = useRouterState({ select: (r) => r.location.pathname });
