@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
@@ -33,6 +34,11 @@ import { Route as AppClientsStaticRouteImport } from './routes/_app/clients.stat
 import { Route as AppClientsPppoeRouteImport } from './routes/_app/clients.pppoe'
 import { Route as AppClientsHotspotRouteImport } from './routes/_app/clients.hotspot'
 
+const RewardsRoute = RewardsRouteImport.update({
+  id: '/rewards',
+  path: '/rewards',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -152,6 +158,7 @@ const AppClientsHotspotRoute = AppClientsHotspotRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/rewards': typeof RewardsRoute
   '/$': typeof AppSplatRoute
   '/dashboard': typeof AppDashboardRoute
   '/loyalty': typeof AppLoyaltyRoute
@@ -176,6 +183,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/rewards': typeof RewardsRoute
   '/$': typeof AppSplatRoute
   '/dashboard': typeof AppDashboardRoute
   '/loyalty': typeof AppLoyaltyRoute
@@ -201,6 +209,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
+  '/rewards': typeof RewardsRoute
   '/_app/$': typeof AppSplatRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/loyalty': typeof AppLoyaltyRoute
@@ -227,6 +236,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/rewards'
     | '/$'
     | '/dashboard'
     | '/loyalty'
@@ -251,6 +261,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/rewards'
     | '/$'
     | '/dashboard'
     | '/loyalty'
@@ -275,6 +286,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_app'
     | '/auth'
+    | '/rewards'
     | '/_app/$'
     | '/_app/dashboard'
     | '/_app/loyalty'
@@ -301,10 +313,18 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRoute
+  RewardsRoute: typeof RewardsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/rewards': {
+      id: '/rewards'
+      path: '/rewards'
+      fullPath: '/rewards'
+      preLoaderRoute: typeof RewardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -531,6 +551,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRoute,
+  RewardsRoute: RewardsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
