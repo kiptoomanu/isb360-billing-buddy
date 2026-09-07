@@ -96,7 +96,7 @@ export function AppSidebar() {
       <SidebarHeader className="border-b border-sidebar-border">
         <div className="flex items-center justify-center px-2 py-3">
           {collapsed ? (
-            <span className="text-lg font-extrabold text-primary">M</span>
+            <span className="text-lg font-extrabold text-primary">I360</span>
           ) : (
             <Logo />
           )}

@@ -285,9 +285,9 @@ export const Route = createFileRoute("/_app/plans")({
   component: PlansPage,
   head: () => ({
     meta: [
-      { title: "Plans & Packages | Manu Billing System" },
+      { title: "Plans & Packages | ISP360 Billing System" },
       { name: "description", content: "Create and manage internet plans: speeds, pricing, validity and device limits for PPPoE, Static IP and Hotspot clients." },
-      { property: "og:title", content: "Plans & Packages | Manu Billing System" },
+      { property: "og:title", content: "Plans & Packages | ISP360 Billing System" },
       { property: "og:description", content: "Manage ISP service packages with speed, pricing and validity settings." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

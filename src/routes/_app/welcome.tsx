@@ -49,7 +49,7 @@ function WelcomePage() {
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-success/15 text-success">
             <ShieldCheck className="h-8 w-8" />
           </div>
-          <CardTitle className="text-2xl">Welcome to Manu Billing System</CardTitle>
+          <CardTitle className="text-2xl">Welcome to ISP360 Billing System</CardTitle>
           <p className="mt-2 text-sm text-muted-foreground">
             Your account is ready, {user?.user_metadata?.full_name || user?.email}.
           </p>

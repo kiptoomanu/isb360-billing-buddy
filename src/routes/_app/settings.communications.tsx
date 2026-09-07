@@ -113,9 +113,9 @@ export const Route = createFileRoute("/_app/settings/communications")({
   component: CommunicationsSettings,
   head: () => ({
     meta: [
-      { title: "SMS & Notifications | Manu Billing System" },
+      { title: "SMS & Notifications | ISP360 Billing System" },
       { name: "description", content: "Connect your bulk SMS gateway and control expiry reminders, payment receipts and welcome messages." },
-      { property: "og:title", content: "SMS & Notifications | Manu Billing System" },
+      { property: "og:title", content: "SMS & Notifications | ISP360 Billing System" },
       { property: "og:description", content: "SMS provider credentials, triggers and message templates." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

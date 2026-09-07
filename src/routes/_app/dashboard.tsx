@@ -61,7 +61,7 @@ function Dashboard() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">Welcome back to Manu Billing System</p>
+        <p className="text-sm text-muted-foreground">Welcome back to ISP360 Billing System</p>
       </div>
 
       <div className="flex justify-end">

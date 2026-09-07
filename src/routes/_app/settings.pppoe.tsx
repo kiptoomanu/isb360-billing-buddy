@@ -103,9 +103,9 @@ export const Route = createFileRoute("/_app/settings/pppoe")({
   component: PppoeSettings,
   head: () => ({
     meta: [
-      { title: "PPPoE Settings | Manu Billing System" },
+      { title: "PPPoE Settings | ISP360 Billing System" },
       { name: "description", content: "PPPoE provisioning defaults: profiles, IP pools, DNS, MTU, grace periods and auto-suspend rules." },
-      { property: "og:title", content: "PPPoE Settings | Manu Billing System" },
+      { property: "og:title", content: "PPPoE Settings | ISP360 Billing System" },
       { property: "og:description", content: "Configure fixed broadband provisioning and billing lifecycle." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
