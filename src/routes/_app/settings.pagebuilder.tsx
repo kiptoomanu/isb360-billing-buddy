@@ -56,7 +56,7 @@ const defaults = {
   show_filters: true,
   dark_header: true,
   radius: "16",
-  footer_note: "Powered by Manu Billing System",
+  footer_note: "Powered by ISP360 Billing System",
   history: [] as { at: string; note: string }[],
 };
 
@@ -571,9 +571,9 @@ export const Route = createFileRoute("/_app/settings/pagebuilder")({
   component: PageBuilder,
   head: () => ({
     meta: [
-      { title: "Hotspot Page Builder | Manu Billing System" },
+      { title: "Hotspot Page Builder | ISP360 Billing System" },
       { name: "description", content: "Build your captive portal with drag-in blocks: header, welcome text, free trial, pricing cards, login form and M-Pesa instructions." },
-      { property: "og:title", content: "Hotspot Page Builder | Manu Billing System" },
+      { property: "og:title", content: "Hotspot Page Builder | ISP360 Billing System" },
       { property: "og:description", content: "Compose, style and deploy your hotspot landing page." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

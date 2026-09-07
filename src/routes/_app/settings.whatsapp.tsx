@@ -101,9 +101,9 @@ export const Route = createFileRoute("/_app/settings/whatsapp")({
   component: WhatsAppSettings,
   head: () => ({
     meta: [
-      { title: "WhatsApp Settings | Manu Billing System" },
+      { title: "WhatsApp Settings | ISP360 Billing System" },
       { name: "description", content: "Connect WhatsApp Business to send renewal reminders, receipts and offer one-tap support from the portal." },
-      { property: "og:title", content: "WhatsApp Settings | Manu Billing System" },
+      { property: "og:title", content: "WhatsApp Settings | ISP360 Billing System" },
       { property: "og:description", content: "WhatsApp Business Cloud API configuration and templates." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

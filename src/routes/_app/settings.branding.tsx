@@ -116,9 +116,9 @@ export const Route = createFileRoute("/_app/settings/branding")({
   component: BrandingSettings,
   head: () => ({
     meta: [
-      { title: "Branding Settings | Manu Billing System" },
+      { title: "Branding Settings | ISP360 Billing System" },
       { name: "description", content: "Set your network name, logo, brand colour, font, support contact and terms shown to subscribers." },
-      { property: "og:title", content: "Branding Settings | Manu Billing System" },
+      { property: "og:title", content: "Branding Settings | ISP360 Billing System" },
       { property: "og:description", content: "Control how subscribers recognise your ISP brand." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

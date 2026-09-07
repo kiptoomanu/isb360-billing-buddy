@@ -32,27 +32,27 @@ export function buildRouterOsScript(r: ScriptRouter, opts: ScriptOptions = {}) {
   const addr = opts.allowedAddress?.trim();
 
   const lines: string[] = [];
-  lines.push(`# Manu Billing System — MikroTik ${opts.reprovision ? "RE-PROVISIONING" : "provisioning"} script`);
+  lines.push(`# ISP360 Billing System — MikroTik ${opts.reprovision ? "RE-PROVISIONING" : "provisioning"} script`);
   lines.push(`# Router: ${r.name}  (${r.host}:${r.port})`);
   lines.push(`# RouterOS v7.1+ — paste into WinBox → New Terminal, or SSH.`);
   lines.push("");
 
   if (opts.reprovision) {
-    lines.push(`# 0) Clean up any previous Manu Billing objects`);
+    lines.push(`# 0) Clean up any previous ISP360 Billing objects`);
     lines.push(`/user remove [find name="${r.username}"]`);
     lines.push(`/user group remove [find name="${GROUP}"]`);
-    lines.push(`/ip firewall filter remove [find comment="Manu Billing API"]`);
+    lines.push(`/ip firewall filter remove [find comment="ISP360 Billing API"]`);
     lines.push("");
   }
 
   lines.push(`# 1) API group with the minimum permissions Manu needs`);
   lines.push(`/user group`);
-  lines.push(`:if ([:len [find name="${GROUP}"]] = 0) do={ add name=${GROUP} policy=api,rest-api,read,write,test,winbox comment="Manu Billing API" } else={ set [find name="${GROUP}"] policy=api,rest-api,read,write,test,winbox }`);
+  lines.push(`:if ([:len [find name="${GROUP}"]] = 0) do={ add name=${GROUP} policy=api,rest-api,read,write,test,winbox comment="ISP360 Billing API" } else={ set [find name="${GROUP}"] policy=api,rest-api,read,write,test,winbox }`);
   lines.push("");
 
   lines.push(`# 2) Create / update the API user`);
   lines.push(`/user`);
-  lines.push(`:if ([:len [find name="${r.username}"]] > 0) do={ set [find name="${r.username}"] password="${r.password}" group=${GROUP} } else={ add name="${r.username}" password="${r.password}" group=${GROUP} comment="Manu Billing API" }`);
+  lines.push(`:if ([:len [find name="${r.username}"]] > 0) do={ set [find name="${r.username}"] password="${r.password}" group=${GROUP} } else={ add name="${r.username}" password="${r.password}" group=${GROUP} comment="ISP360 Billing API" }`);
   lines.push("");
 
   lines.push(`# 3) Enable the REST API service on port ${r.port}`);
@@ -63,7 +63,7 @@ export function buildRouterOsScript(r: ScriptRouter, opts: ScriptOptions = {}) {
 
   lines.push(`# 4) Allow the API port through the firewall`);
   lines.push(`/ip firewall filter`);
-  lines.push(`add chain=input action=accept protocol=tcp dst-port=${r.port}${addr ? ` src-address=${addr}` : ""} comment="Manu Billing API" place-before=0`);
+  lines.push(`add chain=input action=accept protocol=tcp dst-port=${r.port}${addr ? ` src-address=${addr}` : ""} comment="ISP360 Billing API" place-before=0`);
   lines.push("");
 
   if (services.pppoe) {
@@ -71,7 +71,7 @@ export function buildRouterOsScript(r: ScriptRouter, opts: ScriptOptions = {}) {
     lines.push(`/ip pool`);
     lines.push(`:if ([:len [find name="manu-pppoe-pool"]] = 0) do={ add name=manu-pppoe-pool ranges=${pool} }`);
     lines.push(`/ppp profile`);
-    lines.push(`:if ([:len [find name="manu-pppoe"]] = 0) do={ add name=manu-pppoe local-address=${pool.split("-")[0]} remote-address=manu-pppoe-pool comment="Manu Billing" }`);
+    lines.push(`:if ([:len [find name="manu-pppoe"]] = 0) do={ add name=manu-pppoe local-address=${pool.split("-")[0]} remote-address=manu-pppoe-pool comment="ISP360 Billing" }`);
     lines.push(`/interface pppoe-server server`);
     lines.push(`:if ([:len [find service-name="manu"]] = 0) do={ add service-name=manu interface=bridge default-profile=manu-pppoe disabled=no }`);
     lines.push("");
@@ -82,22 +82,22 @@ export function buildRouterOsScript(r: ScriptRouter, opts: ScriptOptions = {}) {
     lines.push(`/ip pool`);
     lines.push(`:if ([:len [find name="manu-hotspot-pool"]] = 0) do={ add name=manu-hotspot-pool ranges=${pool} }`);
     lines.push(`/ip hotspot user profile`);
-    lines.push(`:if ([:len [find name="manu-hotspot"]] = 0) do={ add name=manu-hotspot shared-users=1 comment="Manu Billing" }`);
+    lines.push(`:if ([:len [find name="manu-hotspot"]] = 0) do={ add name=manu-hotspot shared-users=1 comment="ISP360 Billing" }`);
     lines.push(`# Then bind a hotspot server to the client-facing interface:`);
     lines.push(`# /ip hotspot add name=manu interface=bridge address-pool=manu-hotspot-pool profile=default`);
     lines.push("");
   }
 
-  lines.push(`:put "Manu Billing is provisioned: user '${r.username}' on ${svc}:${r.port}."`);
+  lines.push(`:put "ISP360 Billing is provisioned: user '${r.username}' on ${svc}:${r.port}."`);
   return lines.join("\n");
 }
 
 export function buildDeprovisionScript(r: ScriptRouter) {
   return [
-    `# Manu Billing — remove integration from "${r.name}"`,
+    `# ISP360 Billing — remove integration from "${r.name}"`,
     `/user remove [find name="${r.username}"]`,
     `/user group remove [find name="${GROUP}"]`,
-    `/ip firewall filter remove [find comment="Manu Billing API"]`,
-    `:put "Manu Billing access removed."`,
+    `/ip firewall filter remove [find comment="ISP360 Billing API"]`,
+    `:put "ISP360 Billing access removed."`,
   ].join("\n");
 }

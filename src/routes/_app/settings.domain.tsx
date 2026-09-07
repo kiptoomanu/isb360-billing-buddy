@@ -72,9 +72,9 @@ export const Route = createFileRoute("/_app/settings/domain")({
   component: DomainSettings,
   head: () => ({
     meta: [
-      { title: "Domain Settings | Manu Billing System" },
+      { title: "Domain Settings | ISP360 Billing System" },
       { name: "description", content: "Connect a custom domain or subdomain to your captive portal and manage DNS and HTTPS." },
-      { property: "og:title", content: "Domain Settings | Manu Billing System" },
+      { property: "og:title", content: "Domain Settings | ISP360 Billing System" },
       { property: "og:description", content: "Portal domain, DNS records and HTTPS configuration." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

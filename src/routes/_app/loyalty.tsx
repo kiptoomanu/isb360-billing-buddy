@@ -243,9 +243,9 @@ export const Route = createFileRoute("/_app/loyalty")({
   component: LoyaltyPage,
   head: () => ({
     meta: [
-      { title: "Loyalty Points | Manu Billing System" },
+      { title: "Loyalty Points | ISP360 Billing System" },
       { name: "description", content: "Award and redeem loyalty points for internet clients across PPPoE, Static IP and Hotspot services." },
-      { property: "og:title", content: "Loyalty Points | Manu Billing System" },
+      { property: "og:title", content: "Loyalty Points | ISP360 Billing System" },
       { property: "og:description", content: "Track client loyalty tiers, award points and redeem rewards." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

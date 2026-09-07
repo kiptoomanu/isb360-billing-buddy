@@ -106,9 +106,9 @@ export const Route = createFileRoute("/_app/settings/email")({
   component: EmailSettings,
   head: () => ({
     meta: [
-      { title: "Email Settings | Manu Billing System" },
+      { title: "Email Settings | ISP360 Billing System" },
       { name: "description", content: "Configure sender identity, SMTP relay and automatic invoice and receipt emails for subscribers." },
-      { property: "og:title", content: "Email Settings | Manu Billing System" },
+      { property: "og:title", content: "Email Settings | ISP360 Billing System" },
       { property: "og:description", content: "SMTP relay and automated subscriber email configuration." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

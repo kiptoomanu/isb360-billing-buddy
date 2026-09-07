@@ -172,9 +172,9 @@ export const Route = createFileRoute("/_app/settings/payments")({
   component: PaymentsSettings,
   head: () => ({
     meta: [
-      { title: "Payment Settings | Manu Billing System" },
+      { title: "Payment Settings | ISP360 Billing System" },
       { name: "description", content: "Connect M-Pesa, Kopo Kopo, DPO Pay, bank transfer or cash collection so subscribers can pay for their plans." },
-      { property: "og:title", content: "Payment Settings | Manu Billing System" },
+      { property: "og:title", content: "Payment Settings | ISP360 Billing System" },
       { property: "og:description", content: "Choose and configure the payment gateway for your ISP." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

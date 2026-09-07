@@ -143,9 +143,9 @@ export const Route = createFileRoute("/_app/settings/hotspot")({
   component: HotspotSettings,
   head: () => ({
     meta: [
-      { title: "Hotspot Settings | Manu Billing System" },
+      { title: "Hotspot Settings | ISP360 Billing System" },
       { name: "description", content: "Configure the captive portal look, welcome copy, free trials, voucher codes and hotspot session limits." },
-      { property: "og:title", content: "Hotspot Settings | Manu Billing System" },
+      { property: "og:title", content: "Hotspot Settings | ISP360 Billing System" },
       { property: "og:description", content: "Captive portal, vouchers and session lifecycle configuration." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

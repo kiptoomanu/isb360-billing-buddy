@@ -9,9 +9,9 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Award, Gift, Trophy, ArrowDownRight, ArrowUpRight } from "lucide-react";
 
-const TITLE = "My Rewards — Manu Billing System";
+const TITLE = "My Rewards — ISP360 Billing System";
 const DESC =
-  "Check your Manu Billing loyalty points balance, see how you earned or spent them, and browse the rewards you can claim.";
+  "Check your ISP360 Billing loyalty points balance, see how you earned or spent them, and browse the rewards you can claim.";
 
 export const Route = createFileRoute("/rewards")({
   head: () => ({

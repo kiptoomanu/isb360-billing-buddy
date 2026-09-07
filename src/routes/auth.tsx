@@ -84,7 +84,7 @@ function AuthPage() {
           </Tabs>
         </Card>
         <p className="mt-4 text-center text-xs text-muted-foreground">
-          Manu Billing System · ISP Manager
+          ISP360 Billing System · ISP Manager
         </p>
       </div>
     </div>
