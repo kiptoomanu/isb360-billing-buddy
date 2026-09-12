@@ -44,13 +44,12 @@ export function buildAutoProvisionScript(i: AutoScriptInput) {
     L.push(`:if ([:len [find name="manu-hotspot"]] = 0) do={ add name=manu-hotspot shared-users=1 comment="ISP360 Billing" }`);
   }
 
-  // Heartbeat / check-in script + scheduler
-  const body = `{\\\"model\\\":\\\"\$board\\\",\\\"version\\\":\\\"\$ver\\\",\\\"identity\\\":\\\"\$id\\\"}`;
+  // Heartbeat / check-in script + scheduler (form-encoded body: no nested quotes to escape)
   const checkinBody = [
     `:local board [/system resource get board-name];`,
     `:local ver [/system resource get version];`,
     `:local id [/system identity get name];`,
-    `/tool fetch url="${checkin}" http-method=post http-header-field="Content-Type: application/json" http-data="${body}" mode=https keep-result=no;`,
+    `/tool fetch url="${checkin}" http-method=post http-header-field="Content-Type: application/x-www-form-urlencoded" http-data=("model=" . $board . "&version=" . $ver . "&identity=" . $id) mode=https keep-result=no;`,
   ].join(" ");
 
   L.push(`/system script`);
