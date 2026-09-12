@@ -17,10 +17,14 @@ async function handleCheckin(token: string, request: Request) {
     .from("routers").select("id,host").eq("provision_token", token).maybeSingle();
   if (!router) return new Response("Not found", { status: 404 });
 
-  let payload: Record<string, unknown> = {};
+  const payload: Record<string, string> = {};
   try {
     const text = await request.text();
-    if (text) payload = JSON.parse(text);
+    if (text?.trim().startsWith("{")) {
+      Object.assign(payload, JSON.parse(text));
+    } else if (text) {
+      for (const [k, v] of new URLSearchParams(text)) payload[k] = v;
+    }
   } catch {
     /* RouterOS may send a malformed body — ignore */
   }
