@@ -35,7 +35,13 @@ type Router = {
   last_seen_at: string | null;
   model: string | null;
   services: string[] | null;
+  provision_token?: string | null;
+  reported_ip?: string | null;
+  os_version?: string | null;
+  checked_in_at?: string | null;
 };
+
+type RouterEvent = { id: string; stage: string; message: string; created_at: string };
 
 function genPassword(len = 24) {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#%&*-_+=";
