@@ -218,8 +218,45 @@ export type Database = {
         }
         Relationships: []
       }
+      router_events: {
+        Row: {
+          created_at: string
+          id: string
+          level: string
+          message: string
+          router_id: string
+          stage: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          level?: string
+          message: string
+          router_id: string
+          stage: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          level?: string
+          message?: string
+          router_id?: string
+          stage?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "router_events_router_id_fkey"
+            columns: ["router_id"]
+            isOneToOne: false
+            referencedRelation: "routers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       routers: {
         Row: {
+          auto_configured: boolean
+          checked_in_at: string | null
           created_at: string
           host: string
           id: string
@@ -227,10 +264,13 @@ export type Database = {
           model: string | null
           name: string
           notes: string | null
+          os_version: string | null
           password: string
           port: number
           provision_status: string
+          provision_token: string
           provisioned_at: string | null
+          reported_ip: string | null
           services: string[]
           station_id: string | null
           updated_at: string
@@ -238,6 +278,8 @@ export type Database = {
           username: string
         }
         Insert: {
+          auto_configured?: boolean
+          checked_in_at?: string | null
           created_at?: string
           host: string
           id?: string
@@ -245,10 +287,13 @@ export type Database = {
           model?: string | null
           name: string
           notes?: string | null
+          os_version?: string | null
           password: string
           port?: number
           provision_status?: string
+          provision_token?: string
           provisioned_at?: string | null
+          reported_ip?: string | null
           services?: string[]
           station_id?: string | null
           updated_at?: string
@@ -256,6 +301,8 @@ export type Database = {
           username: string
         }
         Update: {
+          auto_configured?: boolean
+          checked_in_at?: string | null
           created_at?: string
           host?: string
           id?: string
@@ -263,10 +310,13 @@ export type Database = {
           model?: string | null
           name?: string
           notes?: string | null
+          os_version?: string | null
           password?: string
           port?: number
           provision_status?: string
+          provision_token?: string
           provisioned_at?: string | null
+          reported_ip?: string | null
           services?: string[]
           station_id?: string | null
           updated_at?: string

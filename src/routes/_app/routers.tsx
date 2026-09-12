@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import { testRouter } from "@/lib/mikrotik.functions";
 import { buildRouterOsScript, buildDeprovisionScript, type ScriptOptions } from "@/lib/routeros-script";
+import { buildOneLiner } from "@/lib/provision-script";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +17,7 @@ import {
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Plug, Loader2, KeyRound, Copy, RefreshCw, Terminal, ShieldOff, RotateCcw } from "lucide-react";
+import { Plus, Pencil, Trash2, Plug, Loader2, KeyRound, Copy, RefreshCw, Terminal, ShieldOff, RotateCcw, CheckCircle2, Clock, Zap } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/routers")({ component: RoutersPage });
@@ -35,7 +36,13 @@ type Router = {
   last_seen_at: string | null;
   model: string | null;
   services: string[] | null;
+  provision_token?: string | null;
+  reported_ip?: string | null;
+  os_version?: string | null;
+  checked_in_at?: string | null;
 };
+
+type RouterEvent = { id: string; stage: string; message: string; created_at: string };
 
 function genPassword(len = 24) {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#%&*-_+=";
@@ -337,6 +344,8 @@ function ScriptDialog({ router, reprovision, onClose }: { router: Router; reprov
         </p>
       </DialogHeader>
 
+      <AutoSetup router={router} />
+
       <div className="grid grid-cols-2 gap-3 rounded-md border p-3">
         <div className="col-span-2 space-y-1.5">
           <Label className="text-xs">Restrict API to address / CIDR (optional)</Label>
@@ -375,5 +384,79 @@ function ScriptDialog({ router, reprovision, onClose }: { router: Router; reprov
         </p>
       </div>
     </DialogContent>
+  );
+}
+
+/** Live automatic linking: the router pulls its own config and checks back in. */
+function AutoSetup({ router }: { router: Router }) {
+  const [origin, setOrigin] = useState("");
+  const [live, setLive] = useState<Router>(router);
+  const [events, setEvents] = useState<RouterEvent[]>([]);
+  const testFn = useServerFn(testRouter);
+  const [verified, setVerified] = useState(false);
+
+  useEffect(() => { setOrigin(window.location.origin); }, []);
+
+  useEffect(() => {
+    let alive = true;
+    const tick = async () => {
+      const [{ data: row }, { data: evs }] = await Promise.all([
+        supabase.from("routers").select("*").eq("id", router.id).maybeSingle(),
+        supabase.from("router_events").select("*").eq("router_id", router.id)
+          .order("created_at", { ascending: false }).limit(6),
+      ]);
+      if (!alive) return;
+      if (row) setLive(row as unknown as Router);
+      setEvents((evs ?? []) as unknown as RouterEvent[]);
+    };
+    tick();
+    const t = setInterval(tick, 4000);
+    return () => { alive = false; clearInterval(t); };
+  }, [router.id]);
+
+  // Once the router checks in, confirm the API link automatically.
+  useEffect(() => {
+    if (live.provision_status !== "online" || verified) return;
+    setVerified(true);
+    testFn({ data: { routerId: router.id } })
+      .then(() => toast.success(`${live.name} is linked and ready`))
+      .catch(() => {/* heartbeat already proves the router is alive */});
+  }, [live.provision_status, verified, router.id, live.name, testFn]);
+
+  const oneLiner = origin && live.provision_token ? buildOneLiner(origin, live.provision_token) : "";
+  const online = live.provision_status === "online";
+
+  return (
+    <div className="space-y-3 rounded-md border border-primary/40 bg-primary/5 p-3">
+      <div className="flex items-center gap-2">
+        <Zap className="h-4 w-4 text-primary" />
+        <p className="text-sm font-semibold">Automatic setup (recommended)</p>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        Open WinBox → New Terminal and paste this one line. The router downloads its own configuration,
+        applies it, and reports back here — no manual steps.
+      </p>
+      <pre className="max-h-28 overflow-auto rounded-md bg-muted p-3 font-mono text-[11px] leading-relaxed">{oneLiner || "Preparing…"}</pre>
+      <div className="flex flex-wrap gap-2">
+        <Button size="sm" disabled={!oneLiner} onClick={() => copy(oneLiner, "Command copied")} className="gap-2">
+          <Copy className="h-4 w-4" /> Copy command
+        </Button>
+      </div>
+
+      <div className={`flex items-center gap-2 rounded-md border p-2 text-xs ${online ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-500" : "border-amber-500/30 bg-amber-500/10 text-amber-500"}`}>
+        {online ? <CheckCircle2 className="h-4 w-4" /> : <Clock className="h-4 w-4 animate-pulse" />}
+        {online
+          ? `${live.name} is online${live.reported_ip ? ` at ${live.reported_ip}` : ""}${live.os_version ? ` — RouterOS ${live.os_version}` : ""}.`
+          : "Waiting for the router to check in…"}
+      </div>
+
+      {events.length > 0 && (
+        <div className="space-y-1 rounded-md bg-muted/60 p-2 font-mono text-[11px] text-muted-foreground">
+          {events.slice().reverse().map((e) => (
+            <div key={e.id}>[{e.stage}] {e.message}</div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

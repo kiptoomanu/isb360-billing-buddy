@@ -33,6 +33,8 @@ import { Route as AppSettingsBrandingRouteImport } from './routes/_app/settings.
 import { Route as AppClientsStaticRouteImport } from './routes/_app/clients.static'
 import { Route as AppClientsPppoeRouteImport } from './routes/_app/clients.pppoe'
 import { Route as AppClientsHotspotRouteImport } from './routes/_app/clients.hotspot'
+import { Route as ApiPublicProvisionTokenRouteImport } from './routes/api/public/provision.$token'
+import { Route as ApiPublicProvisionTokenCheckinRouteImport } from './routes/api/public/provision.$token.checkin'
 
 const RewardsRoute = RewardsRouteImport.update({
   id: '/rewards',
@@ -154,6 +156,17 @@ const AppClientsHotspotRoute = AppClientsHotspotRouteImport.update({
   path: '/clients/hotspot',
   getParentRoute: () => AppRoute,
 } as any)
+const ApiPublicProvisionTokenRoute = ApiPublicProvisionTokenRouteImport.update({
+  id: '/api/public/provision/$token',
+  path: '/api/public/provision/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicProvisionTokenCheckinRoute =
+  ApiPublicProvisionTokenCheckinRouteImport.update({
+    id: '/checkin',
+    path: '/checkin',
+    getParentRoute: () => ApiPublicProvisionTokenRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -179,6 +192,8 @@ export interface FileRoutesByFullPath {
   '/settings/pppoe': typeof AppSettingsPppoeRoute
   '/settings/whatsapp': typeof AppSettingsWhatsappRoute
   '/settings/': typeof AppSettingsIndexRoute
+  '/api/public/provision/$token': typeof ApiPublicProvisionTokenRouteWithChildren
+  '/api/public/provision/$token/checkin': typeof ApiPublicProvisionTokenCheckinRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -203,6 +218,8 @@ export interface FileRoutesByTo {
   '/settings/pppoe': typeof AppSettingsPppoeRoute
   '/settings/whatsapp': typeof AppSettingsWhatsappRoute
   '/settings': typeof AppSettingsIndexRoute
+  '/api/public/provision/$token': typeof ApiPublicProvisionTokenRouteWithChildren
+  '/api/public/provision/$token/checkin': typeof ApiPublicProvisionTokenCheckinRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -230,6 +247,8 @@ export interface FileRoutesById {
   '/_app/settings/pppoe': typeof AppSettingsPppoeRoute
   '/_app/settings/whatsapp': typeof AppSettingsWhatsappRoute
   '/_app/settings/': typeof AppSettingsIndexRoute
+  '/api/public/provision/$token': typeof ApiPublicProvisionTokenRouteWithChildren
+  '/api/public/provision/$token/checkin': typeof ApiPublicProvisionTokenCheckinRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -257,6 +276,8 @@ export interface FileRouteTypes {
     | '/settings/pppoe'
     | '/settings/whatsapp'
     | '/settings/'
+    | '/api/public/provision/$token'
+    | '/api/public/provision/$token/checkin'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -281,6 +302,8 @@ export interface FileRouteTypes {
     | '/settings/pppoe'
     | '/settings/whatsapp'
     | '/settings'
+    | '/api/public/provision/$token'
+    | '/api/public/provision/$token/checkin'
   id:
     | '__root__'
     | '/'
@@ -307,6 +330,8 @@ export interface FileRouteTypes {
     | '/_app/settings/pppoe'
     | '/_app/settings/whatsapp'
     | '/_app/settings/'
+    | '/api/public/provision/$token'
+    | '/api/public/provision/$token/checkin'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -314,6 +339,7 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRoute
   RewardsRoute: typeof RewardsRoute
+  ApiPublicProvisionTokenRoute: typeof ApiPublicProvisionTokenRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -486,6 +512,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppClientsHotspotRouteImport
       parentRoute: typeof AppRoute
     }
+    '/api/public/provision/$token': {
+      id: '/api/public/provision/$token'
+      path: '/api/public/provision/$token'
+      fullPath: '/api/public/provision/$token'
+      preLoaderRoute: typeof ApiPublicProvisionTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/provision/$token/checkin': {
+      id: '/api/public/provision/$token/checkin'
+      path: '/checkin'
+      fullPath: '/api/public/provision/$token/checkin'
+      preLoaderRoute: typeof ApiPublicProvisionTokenCheckinRouteImport
+      parentRoute: typeof ApiPublicProvisionTokenRoute
+    }
   }
 }
 
@@ -547,11 +587,26 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface ApiPublicProvisionTokenRouteChildren {
+  ApiPublicProvisionTokenCheckinRoute: typeof ApiPublicProvisionTokenCheckinRoute
+}
+
+const ApiPublicProvisionTokenRouteChildren: ApiPublicProvisionTokenRouteChildren =
+  {
+    ApiPublicProvisionTokenCheckinRoute: ApiPublicProvisionTokenCheckinRoute,
+  }
+
+const ApiPublicProvisionTokenRouteWithChildren =
+  ApiPublicProvisionTokenRoute._addFileChildren(
+    ApiPublicProvisionTokenRouteChildren,
+  )
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRoute,
   RewardsRoute: RewardsRoute,
+  ApiPublicProvisionTokenRoute: ApiPublicProvisionTokenRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
