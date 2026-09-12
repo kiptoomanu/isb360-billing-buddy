@@ -343,6 +343,8 @@ function ScriptDialog({ router, reprovision, onClose }: { router: Router; reprov
         </p>
       </DialogHeader>
 
+      <AutoSetup router={router} />
+
       <div className="grid grid-cols-2 gap-3 rounded-md border p-3">
         <div className="col-span-2 space-y-1.5">
           <Label className="text-xs">Restrict API to address / CIDR (optional)</Label>
