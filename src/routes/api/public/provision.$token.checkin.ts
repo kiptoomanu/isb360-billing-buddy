@@ -41,6 +41,7 @@ async function handleCheckin(token: string, request: Request) {
     os_version: version,
     model,
     auto_configured: true,
+    ...(ip && !router.host ? { host: ip } : {}),
   }).eq("id", router.id);
 
   await supabaseAdmin.from("router_events").insert({
