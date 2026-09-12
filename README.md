@@ -4,7 +4,7 @@ Create me my own billing system with name manu billing system with the above fea
 
 This project was built with [Lovable](https://lovable.dev).
 
-**Live app**: https://isb360-billing-buddy.lovable.app
+**Live app**: https://isb360-billing-system
 
 ## Build with Lovable
 
