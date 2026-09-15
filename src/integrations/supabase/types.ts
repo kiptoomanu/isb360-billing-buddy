@@ -222,36 +222,54 @@ export type Database = {
         Row: {
           amount: number
           client_id: string
+          confirmed_at: string | null
+          confirmed_by: string | null
           created_at: string
+          days_added: number | null
           id: string
           method: string
           note: string | null
           plan_id: string | null
           reference: string | null
+          refund_amount: number | null
+          refund_reason: string | null
+          refunded_at: string | null
           status: string
           updated_at: string
         }
         Insert: {
           amount?: number
           client_id: string
+          confirmed_at?: string | null
+          confirmed_by?: string | null
           created_at?: string
+          days_added?: number | null
           id?: string
           method?: string
           note?: string | null
           plan_id?: string | null
           reference?: string | null
+          refund_amount?: number | null
+          refund_reason?: string | null
+          refunded_at?: string | null
           status?: string
           updated_at?: string
         }
         Update: {
           amount?: number
           client_id?: string
+          confirmed_at?: string | null
+          confirmed_by?: string | null
           created_at?: string
+          days_added?: number | null
           id?: string
           method?: string
           note?: string | null
           plan_id?: string | null
           reference?: string | null
+          refund_amount?: number | null
+          refund_reason?: string | null
+          refunded_at?: string | null
           status?: string
           updated_at?: string
         }
