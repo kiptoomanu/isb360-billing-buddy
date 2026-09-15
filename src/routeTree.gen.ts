@@ -20,6 +20,7 @@ import { Route as AppRoutersRouteImport } from './routes/_app/routers'
 import { Route as AppPlansRouteImport } from './routes/_app/plans'
 import { Route as AppLoyaltyRouteImport } from './routes/_app/loyalty'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
+import { Route as AppBillingRouteImport } from './routes/_app/billing'
 import { Route as AppSplatRouteImport } from './routes/_app/$'
 import { Route as AppSettingsIndexRouteImport } from './routes/_app/settings.index'
 import { Route as AppSettingsWhatsappRouteImport } from './routes/_app/settings.whatsapp'
@@ -89,6 +90,11 @@ const AppLoyaltyRoute = AppLoyaltyRouteImport.update({
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppBillingRoute = AppBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
   getParentRoute: () => AppRoute,
 } as any)
 const AppSplatRoute = AppSplatRouteImport.update({
@@ -180,6 +186,7 @@ export interface FileRoutesByFullPath {
   '/portal': typeof PortalRoute
   '/rewards': typeof RewardsRoute
   '/$': typeof AppSplatRoute
+  '/billing': typeof AppBillingRoute
   '/dashboard': typeof AppDashboardRoute
   '/loyalty': typeof AppLoyaltyRoute
   '/plans': typeof AppPlansRoute
@@ -208,6 +215,7 @@ export interface FileRoutesByTo {
   '/portal': typeof PortalRoute
   '/rewards': typeof RewardsRoute
   '/$': typeof AppSplatRoute
+  '/billing': typeof AppBillingRoute
   '/dashboard': typeof AppDashboardRoute
   '/loyalty': typeof AppLoyaltyRoute
   '/plans': typeof AppPlansRoute
@@ -237,6 +245,7 @@ export interface FileRoutesById {
   '/portal': typeof PortalRoute
   '/rewards': typeof RewardsRoute
   '/_app/$': typeof AppSplatRoute
+  '/_app/billing': typeof AppBillingRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/loyalty': typeof AppLoyaltyRoute
   '/_app/plans': typeof AppPlansRoute
@@ -267,6 +276,7 @@ export interface FileRouteTypes {
     | '/portal'
     | '/rewards'
     | '/$'
+    | '/billing'
     | '/dashboard'
     | '/loyalty'
     | '/plans'
@@ -295,6 +305,7 @@ export interface FileRouteTypes {
     | '/portal'
     | '/rewards'
     | '/$'
+    | '/billing'
     | '/dashboard'
     | '/loyalty'
     | '/plans'
@@ -323,6 +334,7 @@ export interface FileRouteTypes {
     | '/portal'
     | '/rewards'
     | '/_app/$'
+    | '/_app/billing'
     | '/_app/dashboard'
     | '/_app/loyalty'
     | '/_app/plans'
@@ -432,6 +444,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/billing': {
+      id: '/_app/billing'
+      path: '/billing'
+      fullPath: '/billing'
+      preLoaderRoute: typeof AppBillingRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/$': {
@@ -581,6 +600,7 @@ const AppSettingsRouteWithChildren = AppSettingsRoute._addFileChildren(
 
 interface AppRouteChildren {
   AppSplatRoute: typeof AppSplatRoute
+  AppBillingRoute: typeof AppBillingRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppLoyaltyRoute: typeof AppLoyaltyRoute
   AppPlansRoute: typeof AppPlansRoute
@@ -594,6 +614,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppSplatRoute: AppSplatRoute,
+  AppBillingRoute: AppBillingRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppLoyaltyRoute: AppLoyaltyRoute,
   AppPlansRoute: AppPlansRoute,
