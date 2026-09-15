@@ -124,6 +124,7 @@ export async function pushClientToRouter(supabase: any, clientId: string) {
         password: client.username,
         disabled,
       };
+      if (rateLimit) payload["rate-limit"] = rateLimit;
       if (id) {
         await rosFetch(router, `/ip/hotspot/user/${id}`, { method: "PATCH", body: JSON.stringify(payload) });
       } else {
@@ -134,7 +135,12 @@ export async function pushClientToRouter(supabase: any, clientId: string) {
 
     // static: nothing automatic on RouterOS by default
     return { ok: true, action: "skipped", type: "static" };
-  });
+}
+
+export const syncClientToRouter = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ clientId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => pushClientToRouter(context.supabase, data.clientId));
 
 export const setClientEnabled = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
