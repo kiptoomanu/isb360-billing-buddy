@@ -79,19 +79,26 @@ export const testRouter = createServerFn({ method: "POST" })
   });
 
 
-export const syncClientToRouter = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ clientId: z.string().uuid() }).parse(d))
-  .handler(async ({ data, context }) => {
-    const { supabase } = context;
+/** Pushes a client (with its plan speed) to its MikroTik router. Reusable from other server functions. */
+export async function pushClientToRouter(supabase: any, clientId: string) {
     const { data: client, error } = await supabase
-      .from("clients").select("*").eq("id", data.clientId).single();
+      .from("clients").select("*").eq("id", clientId).single();
     if (error || !client) throw new Error(error?.message || "Client not found");
     if (!client.router_id) throw new Error("Client has no router assigned");
     if (!client.username) throw new Error("Client has no username");
 
     const router = await loadRouter(supabase, client.router_id);
     const disabled = client.status !== "active" ? "true" : "false";
+
+    // Plan speed → RouterOS rate-limit "upload/download" in kbps
+    let rateLimit: string | undefined;
+    if (client.plan_id) {
+      const { data: plan } = await supabase
+        .from("plans").select("download_kbps,upload_kbps").eq("id", client.plan_id).maybeSingle();
+      if (plan && (plan.download_kbps || plan.upload_kbps)) {
+        rateLimit = `${plan.upload_kbps || plan.download_kbps}k/${plan.download_kbps || plan.upload_kbps}k`;
+      }
+    }
 
     if (client.type === "pppoe") {
       const id = await findByName(router, "ppp/secret", client.username);
@@ -101,6 +108,7 @@ export const syncClientToRouter = createServerFn({ method: "POST" })
         service: "pppoe",
         disabled,
       };
+      if (rateLimit) payload["rate-limit"] = rateLimit;
       if (id) {
         await rosFetch(router, `/ppp/secret/${id}`, { method: "PATCH", body: JSON.stringify(payload) });
       } else {
