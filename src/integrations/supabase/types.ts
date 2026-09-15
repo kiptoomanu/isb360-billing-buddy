@@ -309,7 +309,10 @@ export type Database = {
       }
       routers: {
         Row: {
+          auto_bridge: boolean
           auto_configured: boolean
+          bridge_name: string
+          bridge_ports: string[]
           checked_in_at: string | null
           created_at: string
           host: string
@@ -328,11 +331,15 @@ export type Database = {
           services: string[]
           station_id: string | null
           updated_at: string
+          uplink_port: string
           use_https: boolean
           username: string
         }
         Insert: {
+          auto_bridge?: boolean
           auto_configured?: boolean
+          bridge_name?: string
+          bridge_ports?: string[]
           checked_in_at?: string | null
           created_at?: string
           host: string
@@ -351,11 +358,15 @@ export type Database = {
           services?: string[]
           station_id?: string | null
           updated_at?: string
+          uplink_port?: string
           use_https?: boolean
           username: string
         }
         Update: {
+          auto_bridge?: boolean
           auto_configured?: boolean
+          bridge_name?: string
+          bridge_ports?: string[]
           checked_in_at?: string | null
           created_at?: string
           host?: string
@@ -374,6 +385,7 @@ export type Database = {
           services?: string[]
           station_id?: string | null
           updated_at?: string
+          uplink_port?: string
           use_https?: boolean
           username?: string
         }
