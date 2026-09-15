@@ -6,6 +6,10 @@ export type ScriptRouter = {
   password: string;
   use_https: boolean;
   services?: string[] | null;
+  bridge_name?: string | null;
+  bridge_ports?: string[] | null;
+  uplink_port?: string | null;
+  auto_bridge?: boolean | null;
 };
 
 export type ScriptOptions = {
@@ -19,7 +23,14 @@ export type ScriptOptions = {
   hotspot?: boolean;
   /** Pool used by the PPPoE/Hotspot scaffolding. */
   pool?: string;
+  /** Create the ISP360 client bridge and add the selected ports. */
+  bridge?: boolean;
+  bridgeName?: string;
+  bridgePorts?: string[];
+  uplinkPort?: string;
 };
+
+import { buildBridgeLines, DEFAULT_BRIDGE, DEFAULT_BRIDGE_PORTS } from "./provision-script";
 
 const GROUP = "manu-api";
 
@@ -66,25 +77,34 @@ export function buildRouterOsScript(r: ScriptRouter, opts: ScriptOptions = {}) {
   lines.push(`add chain=input action=accept protocol=tcp dst-port=${r.port}${addr ? ` src-address=${addr}` : ""} comment="ISP360 Billing API" place-before=0`);
   lines.push("");
 
+  const bridgeOn = opts.bridge ?? (r.auto_bridge ?? true);
+  const bridgeName = opts.bridgeName || r.bridge_name || DEFAULT_BRIDGE;
+  const uplink = opts.uplinkPort || r.uplink_port || "ether1";
+  if (bridgeOn) {
+    lines.push(`# 5) Client bridge — all customer ports in one bridge`);
+    lines.push(...buildBridgeLines(bridgeName, opts.bridgePorts ?? r.bridge_ports ?? DEFAULT_BRIDGE_PORTS, uplink));
+    lines.push("");
+  }
+
   if (services.pppoe) {
-    lines.push(`# 5) PPPoE service scaffolding`);
+    lines.push(`# 6) PPPoE service scaffolding`);
     lines.push(`/ip pool`);
     lines.push(`:if ([:len [find name="manu-pppoe-pool"]] = 0) do={ add name=manu-pppoe-pool ranges=${pool} }`);
     lines.push(`/ppp profile`);
     lines.push(`:if ([:len [find name="manu-pppoe"]] = 0) do={ add name=manu-pppoe local-address=${pool.split("-")[0]} remote-address=manu-pppoe-pool comment="ISP360 Billing" }`);
     lines.push(`/interface pppoe-server server`);
-    lines.push(`:if ([:len [find service-name="manu"]] = 0) do={ add service-name=manu interface=bridge default-profile=manu-pppoe disabled=no }`);
+    lines.push(`:if ([:len [find service-name="manu"]] = 0) do={ add service-name=manu interface=${bridgeOn ? bridgeName : "bridge"} default-profile=manu-pppoe disabled=no }`);
     lines.push("");
   }
 
   if (services.hotspot) {
-    lines.push(`# 6) Hotspot service scaffolding`);
+    lines.push(`# 7) Hotspot service scaffolding`);
     lines.push(`/ip pool`);
     lines.push(`:if ([:len [find name="manu-hotspot-pool"]] = 0) do={ add name=manu-hotspot-pool ranges=${pool} }`);
     lines.push(`/ip hotspot user profile`);
     lines.push(`:if ([:len [find name="manu-hotspot"]] = 0) do={ add name=manu-hotspot shared-users=1 comment="ISP360 Billing" }`);
     lines.push(`# Then bind a hotspot server to the client-facing interface:`);
-    lines.push(`# /ip hotspot add name=manu interface=bridge address-pool=manu-hotspot-pool profile=default`);
+    lines.push(`# /ip hotspot add name=manu interface=${bridgeOn ? bridgeName : "bridge"} address-pool=manu-hotspot-pool profile=default`);
     lines.push("");
   }
 

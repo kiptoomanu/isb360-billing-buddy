@@ -4,7 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import { testRouter } from "@/lib/mikrotik.functions";
 import { buildRouterOsScript, buildDeprovisionScript, type ScriptOptions } from "@/lib/routeros-script";
-import { buildOneLiner } from "@/lib/provision-script";
+import { buildOneLiner, DEFAULT_BRIDGE, DEFAULT_BRIDGE_PORTS } from "@/lib/provision-script";
+
+const PORT_CHOICES = ["ether1","ether2","ether3","ether4","ether5","ether6","ether7","ether8","ether9","ether10","sfp1","sfp-sfpplus1","wlan1","wlan2"];
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,6 +42,10 @@ type Router = {
   reported_ip?: string | null;
   os_version?: string | null;
   checked_in_at?: string | null;
+  auto_bridge?: boolean | null;
+  bridge_name?: string | null;
+  bridge_ports?: string[] | null;
+  uplink_port?: string | null;
 };
 
 type RouterEvent = { id: string; stage: string; message: string; created_at: string };
@@ -245,6 +251,10 @@ function RouterDialog({ editing, onClose }: { editing: Router | null; onClose: (
     notes: editing?.notes ?? "",
     pppoe: (editing?.services ?? ["pppoe"]).includes("pppoe"),
     hotspot: (editing?.services ?? []).includes("hotspot"),
+    auto_bridge: editing?.auto_bridge ?? true,
+    bridge_name: editing?.bridge_name ?? DEFAULT_BRIDGE,
+    uplink_port: editing?.uplink_port ?? "ether1",
+    bridge_ports: editing?.bridge_ports ?? DEFAULT_BRIDGE_PORTS,
   });
   const [busy, setBusy] = useState(false);
 
@@ -257,6 +267,10 @@ function RouterDialog({ editing, onClose }: { editing: Router | null; onClose: (
       username: form.username, password: form.password,
       use_https: form.use_https, notes: form.notes || null,
       services, provision_status: "provisioning",
+      auto_bridge: form.auto_bridge,
+      bridge_name: form.bridge_name || "bridge-isp360",
+      uplink_port: form.uplink_port || "ether1",
+      bridge_ports: form.bridge_ports.filter((p) => p !== form.uplink_port),
     };
     const res = editing
       ? await supabase.from("routers").update(payload as never).eq("id", editing.id).select().single()
@@ -300,6 +314,42 @@ function RouterDialog({ editing, onClose }: { editing: Router | null; onClose: (
             <Switch checked={form.hotspot} onCheckedChange={(v) => setForm({ ...form, hotspot: v })} />
           </div>
         </div>
+        <div className="col-span-2 space-y-3 rounded-md border p-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <Label>Bridge ports automatically</Label>
+              <p className="text-xs text-muted-foreground">ISP360 builds one client bridge on the router during linking.</p>
+            </div>
+            <Switch checked={form.auto_bridge} onCheckedChange={(v) => setForm({ ...form, auto_bridge: v })} />
+          </div>
+          {form.auto_bridge && (
+            <>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5"><Label className="text-xs">Bridge name</Label>
+                  <Input value={form.bridge_name} onChange={(e) => setForm({ ...form, bridge_name: e.target.value })} className="font-mono text-xs" /></div>
+                <div className="space-y-1.5"><Label className="text-xs">Uplink (internet) port</Label>
+                  <Input value={form.uplink_port} onChange={(e) => setForm({ ...form, uplink_port: e.target.value })} className="font-mono text-xs" /></div>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Ports added to the bridge</Label>
+                <div className="flex flex-wrap gap-1.5">
+                  {PORT_CHOICES.map((p) => {
+                    const active = form.bridge_ports.includes(p);
+                    const isUplink = p === form.uplink_port;
+                    return (
+                      <button key={p} type="button" disabled={isUplink}
+                        onClick={() => setForm({ ...form, bridge_ports: active ? form.bridge_ports.filter((x) => x !== p) : [...form.bridge_ports, p] })}
+                        className={`rounded-md border px-2 py-1 font-mono text-[11px] transition ${isUplink ? "opacity-40" : active ? "border-primary bg-primary/15 text-primary" : "text-muted-foreground hover:bg-muted"}`}>
+                        {p}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="text-xs text-muted-foreground">Don't bridge the uplink port — {form.uplink_port} is kept out automatically.</p>
+              </div>
+            </>
+          )}
+        </div>
         <div className="col-span-2 space-y-1.5"><Label>Notes</Label><Input value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></div>
         <DialogFooter className="col-span-2 mt-2">
           <Button type="submit" disabled={busy} className="gap-2">
@@ -320,6 +370,10 @@ function ScriptDialog({ router, reprovision, onClose }: { router: Router; reprov
     pppoe: (router.services ?? ["pppoe"]).includes("pppoe"),
     hotspot: (router.services ?? []).includes("hotspot"),
     pool: "10.10.0.2-10.10.0.254",
+    bridge: router.auto_bridge ?? true,
+    bridgeName: router.bridge_name ?? DEFAULT_BRIDGE,
+    bridgePorts: router.bridge_ports ?? DEFAULT_BRIDGE_PORTS,
+    uplinkPort: router.uplink_port ?? "ether1",
   });
   const script = useMemo(() => buildRouterOsScript(router, opts), [router, opts]);
 
@@ -353,6 +407,7 @@ function ScriptDialog({ router, reprovision, onClose }: { router: Router; reprov
         </div>
         <div className="flex items-center justify-between"><Label className="text-xs">Include PPPoE setup</Label><Switch checked={!!opts.pppoe} onCheckedChange={(v) => setOpts({ ...opts, pppoe: v })} /></div>
         <div className="flex items-center justify-between"><Label className="text-xs">Include Hotspot setup</Label><Switch checked={!!opts.hotspot} onCheckedChange={(v) => setOpts({ ...opts, hotspot: v })} /></div>
+        <div className="col-span-2 flex items-center justify-between"><Label className="text-xs">Build client bridge ({opts.bridgeName}, uplink {opts.uplinkPort} excluded)</Label><Switch checked={!!opts.bridge} onCheckedChange={(v) => setOpts({ ...opts, bridge: v })} /></div>
         <div className="col-span-2 space-y-1.5">
           <Label className="text-xs">Client IP pool</Label>
           <Input value={opts.pool} onChange={(e) => setOpts({ ...opts, pool: e.target.value })} className="font-mono text-xs" />

@@ -9,9 +9,40 @@ export type AutoScriptInput = {
   pool?: string;
   origin: string;
   token: string;
+  /** Automatically build the client-side bridge during linking. */
+  autoBridge?: boolean;
+  bridgeName?: string;
+  /** Ports added to the bridge (uplink is always excluded). */
+  bridgePorts?: string[];
+  /** Internet-facing port that must stay OUT of the bridge. */
+  uplinkPort?: string;
 };
 
 const GROUP = "manu-api";
+
+export const DEFAULT_BRIDGE = "bridge-isp360";
+export const DEFAULT_BRIDGE_PORTS = [
+  "ether3", "ether4", "ether5", "ether6", "ether7",
+  "ether8", "ether9", "ether10", "sfp1", "wlan1",
+];
+
+/**
+ * RouterOS lines that create the ISP360 client bridge and add every selected
+ * port to it. The uplink port is always skipped so internet access is not lost.
+ */
+export function buildBridgeLines(bridgeName: string, ports: string[], uplink: string) {
+  const safe = ports.filter((p) => p && p !== uplink);
+  const L: string[] = [];
+  L.push(`# ISP360 client bridge — "${bridgeName}" (uplink ${uplink} stays out of the bridge)`);
+  L.push(`/interface bridge`);
+  L.push(`:if ([:len [find name="${bridgeName}"]] = 0) do={ add name=${bridgeName} comment="ISP360 Billing client bridge" }`);
+  L.push(`/interface bridge port`);
+  for (const p of safe) {
+    L.push(`:if ([:len [/interface find name="${p}"]] > 0) do={ :if ([:len [find interface="${p}"]] = 0) do={ add bridge=${bridgeName} interface=${p} comment="ISP360 Billing" } else={ set [find interface="${p}"] bridge=${bridgeName} } }`);
+  }
+  L.push(`:if ([:len [find interface="${uplink}"]] > 0) do={ remove [find interface="${uplink}"] }`);
+  return L;
+}
 
 export function buildAutoProvisionScript(i: AutoScriptInput) {
   const svc = i.use_https ? "www-ssl" : "www";
@@ -31,17 +62,29 @@ export function buildAutoProvisionScript(i: AutoScriptInput) {
   L.push(`/ip firewall filter`);
   L.push(`:if ([:len [find comment="ISP360 Billing API"]] = 0) do={ add chain=input action=accept protocol=tcp dst-port=${i.port} comment="ISP360 Billing API" place-before=0 }`);
 
+  const bridge = i.autoBridge !== false;
+  const bridgeName = i.bridgeName || DEFAULT_BRIDGE;
+  if (bridge) L.push(...buildBridgeLines(bridgeName, i.bridgePorts ?? DEFAULT_BRIDGE_PORTS, i.uplinkPort ?? "ether1"));
+
   if (pppoe) {
     L.push(`/ip pool`);
     L.push(`:if ([:len [find name="manu-pppoe-pool"]] = 0) do={ add name=manu-pppoe-pool ranges=${pool} }`);
     L.push(`/ppp profile`);
     L.push(`:if ([:len [find name="manu-pppoe"]] = 0) do={ add name=manu-pppoe local-address=${pool.split("-")[0]} remote-address=manu-pppoe-pool comment="ISP360 Billing" }`);
+    if (bridge) {
+      L.push(`/interface pppoe-server server`);
+      L.push(`:if ([:len [find interface="${bridgeName}"]] = 0) do={ add service-name=isp360 interface=${bridgeName} default-profile=manu-pppoe disabled=no } else={ set [find interface="${bridgeName}"] default-profile=manu-pppoe disabled=no }`);
+    }
   }
   if (hotspot) {
     L.push(`/ip pool`);
     L.push(`:if ([:len [find name="manu-hotspot-pool"]] = 0) do={ add name=manu-hotspot-pool ranges=${pool} }`);
     L.push(`/ip hotspot user profile`);
     L.push(`:if ([:len [find name="manu-hotspot"]] = 0) do={ add name=manu-hotspot shared-users=1 comment="ISP360 Billing" }`);
+    if (bridge) {
+      L.push(`/ip hotspot`);
+      L.push(`:if ([:len [find interface="${bridgeName}"]] = 0) do={ add name=isp360-hotspot interface=${bridgeName} address-pool=manu-hotspot-pool profile=default disabled=no }`);
+    }
   }
 
   // Heartbeat / check-in script + scheduler (form-encoded body: no nested quotes to escape)
