@@ -9,6 +9,13 @@ export type AutoScriptInput = {
   pool?: string;
   origin: string;
   token: string;
+  /** Automatically build the client-side bridge during linking. */
+  autoBridge?: boolean;
+  bridgeName?: string;
+  /** Ports added to the bridge (uplink is always excluded). */
+  bridgePorts?: string[];
+  /** Internet-facing port that must stay OUT of the bridge. */
+  uplinkPort?: string;
 };
 
 const GROUP = "manu-api";
