@@ -38,17 +38,29 @@ export function buildAutoProvisionScript(i: AutoScriptInput) {
   L.push(`/ip firewall filter`);
   L.push(`:if ([:len [find comment="ISP360 Billing API"]] = 0) do={ add chain=input action=accept protocol=tcp dst-port=${i.port} comment="ISP360 Billing API" place-before=0 }`);
 
+  const bridge = i.autoBridge !== false;
+  const bridgeName = i.bridgeName || DEFAULT_BRIDGE;
+  if (bridge) L.push(...buildBridgeLines(bridgeName, i.bridgePorts ?? DEFAULT_BRIDGE_PORTS, i.uplinkPort ?? "ether1"));
+
   if (pppoe) {
     L.push(`/ip pool`);
     L.push(`:if ([:len [find name="manu-pppoe-pool"]] = 0) do={ add name=manu-pppoe-pool ranges=${pool} }`);
     L.push(`/ppp profile`);
     L.push(`:if ([:len [find name="manu-pppoe"]] = 0) do={ add name=manu-pppoe local-address=${pool.split("-")[0]} remote-address=manu-pppoe-pool comment="ISP360 Billing" }`);
+    if (bridge) {
+      L.push(`/interface pppoe-server server`);
+      L.push(`:if ([:len [find interface="${bridgeName}"]] = 0) do={ add service-name=isp360 interface=${bridgeName} default-profile=manu-pppoe disabled=no } else={ set [find interface="${bridgeName}"] default-profile=manu-pppoe disabled=no }`);
+    }
   }
   if (hotspot) {
     L.push(`/ip pool`);
     L.push(`:if ([:len [find name="manu-hotspot-pool"]] = 0) do={ add name=manu-hotspot-pool ranges=${pool} }`);
     L.push(`/ip hotspot user profile`);
     L.push(`:if ([:len [find name="manu-hotspot"]] = 0) do={ add name=manu-hotspot shared-users=1 comment="ISP360 Billing" }`);
+    if (bridge) {
+      L.push(`/ip hotspot`);
+      L.push(`:if ([:len [find interface="${bridgeName}"]] = 0) do={ add name=isp360-hotspot interface=${bridgeName} address-pool=manu-hotspot-pool profile=default disabled=no }`);
+    }
   }
 
   // Heartbeat / check-in script + scheduler (form-encoded body: no nested quotes to escape)
