@@ -11,7 +11,7 @@ export const Route = createFileRoute("/api/public/provision/$token")({
 
         const { data: router } = await supabaseAdmin
           .from("routers")
-          .select("id,name,username,password,port,use_https,services")
+          .select("id,name,username,password,port,use_https,services,auto_bridge,bridge_name,bridge_ports,uplink_port")
           .eq("provision_token", token)
           .maybeSingle();
         if (!router) return new Response("Not found", { status: 404 });
@@ -24,6 +24,10 @@ export const Route = createFileRoute("/api/public/provision/$token")({
           port: router.port,
           use_https: router.use_https,
           services: (router.services as string[] | null) ?? ["pppoe"],
+          autoBridge: (router as any).auto_bridge ?? true,
+          bridgeName: (router as any).bridge_name ?? undefined,
+          bridgePorts: ((router as any).bridge_ports as string[] | null) ?? undefined,
+          uplinkPort: (router as any).uplink_port ?? undefined,
           origin,
           token,
         });
