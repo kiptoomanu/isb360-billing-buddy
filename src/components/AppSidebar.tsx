@@ -51,6 +51,7 @@ const network: Item[] = [
 ];
 
 const finance: Item[] = [
+  { title: "Billing Portal", url: "/billing", icon: Wallet },
   { title: "Payments", url: "/finance/payments", icon: CreditCard },
   { title: "Expenses", url: "/finance/expenses", icon: Receipt },
   { title: "CRM", url: "/finance/crm", icon: Users },
