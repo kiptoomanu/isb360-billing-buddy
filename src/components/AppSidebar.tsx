@@ -18,6 +18,7 @@ import {
   Settings,
 
 
+  Wallet,
 } from "lucide-react";
 import {
   Sidebar,
