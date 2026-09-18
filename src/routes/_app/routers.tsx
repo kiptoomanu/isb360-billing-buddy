@@ -505,6 +505,8 @@ function AutoSetup({ router }: { router: Router }) {
           : "Waiting for the router to check in…"}
       </div>
 
+      <RouterPlanSync routerId={router.id} online={online} />
+
       {events.length > 0 && (
         <div className="space-y-1 rounded-md bg-muted/60 p-2 font-mono text-[11px] text-muted-foreground">
           {events.slice().reverse().map((e) => (
