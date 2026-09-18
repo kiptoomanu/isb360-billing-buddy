@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
-import { testRouter } from "@/lib/mikrotik.functions";
+import { testRouter, syncClientToRouter } from "@/lib/mikrotik.functions";
 import { buildRouterOsScript, buildDeprovisionScript, type ScriptOptions } from "@/lib/routeros-script";
 import { buildOneLiner, DEFAULT_BRIDGE, DEFAULT_BRIDGE_PORTS } from "@/lib/provision-script";
 
@@ -511,6 +511,73 @@ function AutoSetup({ router }: { router: Router }) {
         <div className="space-y-1 rounded-md bg-muted/60 p-2 font-mono text-[11px] text-muted-foreground">
           {events.slice().reverse().map((e) => (
             <div key={e.id}>[{e.stage}] {e.message}</div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+type RouterClient = {
+  id: string;
+  full_name: string;
+  username: string | null;
+  type: string;
+  status: string;
+  expiry_date: string | null;
+  plans: { name: string; download_kbps: number; upload_kbps: number } | null;
+};
+
+/** Shows the plan and subscription data behind this router and pushes plan speeds to it. */
+function RouterPlanSync({ routerId, online }: { routerId: string; online: boolean }) {
+  const [rows, setRows] = useState<RouterClient[]>([]);
+  const [busy, setBusy] = useState(false);
+  const syncFn = useServerFn(syncClientToRouter);
+
+  const load = useCallback(async () => {
+    const { data } = await supabase
+      .from("clients")
+      .select("id, full_name, username, type, status, expiry_date, plans(name, download_kbps, upload_kbps)")
+      .eq("router_id", routerId)
+      .order("full_name");
+    setRows((data ?? []) as unknown as RouterClient[]);
+  }, [routerId]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const speed = (c: RouterClient) =>
+    c.plans ? `${Math.round((c.plans.download_kbps || 0) / 1000)}/${Math.round((c.plans.upload_kbps || 0) / 1000)} Mbps` : "No plan";
+
+  const pushAll = async () => {
+    setBusy(true);
+    let ok = 0;
+    for (const c of rows) {
+      try { await syncFn({ data: { clientId: c.id } }); ok += 1; } catch { /* skip */ }
+    }
+    setBusy(false);
+    toast.success(`Plan speeds pushed for ${ok} of ${rows.length} customers`);
+    await load();
+  };
+
+  return (
+    <div className="space-y-2 rounded-md border p-2">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold">Customers & plan speeds on this router</p>
+        <Button size="sm" variant="outline" disabled={!online || busy || rows.length === 0} onClick={pushAll}>
+          {busy ? "Pushing…" : "Push plan speeds"}
+        </Button>
+      </div>
+      {rows.length === 0 ? (
+        <p className="text-[11px] text-muted-foreground">No customers assigned to this router yet.</p>
+      ) : (
+        <div className="max-h-40 space-y-1 overflow-auto text-[11px]">
+          {rows.map((c) => (
+            <div key={c.id} className="flex items-center justify-between gap-2 border-b py-1 last:border-0">
+              <span className="truncate">{c.full_name} <span className="text-muted-foreground">({c.username ?? c.type})</span></span>
+              <span className="shrink-0 text-muted-foreground">
+                {speed(c)} · {c.status}{c.expiry_date ? ` · till ${c.expiry_date}` : ""}
+              </span>
+            </div>
           ))}
         </div>
       )}
