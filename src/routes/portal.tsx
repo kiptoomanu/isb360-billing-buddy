@@ -1,7 +1,13 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { lookupAccount, requestRenewal, type PortalData } from "@/lib/portal.functions";
+import {
+  lookupAccount,
+  requestRenewal,
+  checkRenewalStatus,
+  type PortalData,
+} from "@/lib/portal.functions";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -55,15 +61,21 @@ const tierOf = (p: number) =>
 function PortalPage() {
   const lookup = useServerFn(lookupAccount);
   const renew = useServerFn(requestRenewal);
+  const checkStatus = useServerFn(checkRenewalStatus);
   const [account, setAccount] = useState("");
   const [fullName, setFullName] = useState("");
   const [method, setMethod] = useState<"mpesa" | "cash" | "bank" | "card">("mpesa");
   const [reference, setReference] = useState("");
+  const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [renewing, setRenewing] = useState(false);
+  const [waiting, setWaiting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [data, setData] = useState<PortalData | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => () => { if (pollRef.current) clearInterval(pollRef.current); }, []);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,23 +92,62 @@ function PortalPage() {
     }
   };
 
+  const watchPayment = (renewalId: string) => {
+    setWaiting(true);
+    const started = Date.now();
+    if (pollRef.current) clearInterval(pollRef.current);
+    pollRef.current = setInterval(async () => {
+      try {
+        const res = await checkStatus({ data: { account, fullName, renewalId } });
+        setData(res.portal);
+        if (res.status === "confirmed") {
+          clearInterval(pollRef.current!);
+          setWaiting(false);
+          setNotice("Payment received — your subscription has been extended.");
+        } else if (res.status === "rejected" || res.status === "refunded") {
+          clearInterval(pollRef.current!);
+          setWaiting(false);
+          setError(res.reason ?? "The payment was not completed.");
+        } else if (Date.now() - started > 180_000) {
+          clearInterval(pollRef.current!);
+          setWaiting(false);
+          setNotice("We are still waiting for your payment confirmation.");
+        }
+      } catch {
+        /* keep polling */
+      }
+    }, 4000);
+  };
+
   const onRenew = async () => {
     setRenewing(true);
     setError(null);
     setNotice(null);
     try {
       const res = await renew({
-        data: { account, fullName, method, reference: reference || undefined },
+        data: {
+          account,
+          fullName,
+          method,
+          reference: reference || undefined,
+          phone: phone || undefined,
+        },
       });
-      setData(res);
+      setData(res.portal);
       setReference("");
-      setNotice("Renewal request sent. Our team will confirm your payment shortly.");
+      setNotice(res.message);
+      if (res.mode === "card" && res.checkoutUrl) {
+        window.location.href = res.checkoutUrl;
+        return;
+      }
+      if (res.mode === "mpesa") watchPayment(res.renewalId);
     } catch (err: any) {
       setError(err?.message ?? "We could not send your renewal request.");
     } finally {
       setRenewing(false);
     }
   };
+
 
   const used = data?.daysUsed ?? 0;
   const pct = data && data.validityDays > 0 ? Math.round((used / data.validityDays) * 100) : 0;
@@ -261,19 +312,45 @@ function PortalPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="reference">Payment reference (optional)</Label>
-                  <Input
-                    id="reference"
-                    value={reference}
-                    onChange={(e) => setReference(e.target.value)}
-                    placeholder="e.g. M-Pesa code"
-                  />
-                </div>
+                {method === "mpesa" ? (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="phone">M-Pesa phone number</Label>
+                    <Input
+                      id="phone"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder={data.account ?? "07XXXXXXXX"}
+                    />
+                  </div>
+                ) : (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="reference">Payment reference (optional)</Label>
+                    <Input
+                      id="reference"
+                      value={reference}
+                      onChange={(e) => setReference(e.target.value)}
+                      placeholder="e.g. bank slip number"
+                    />
+                  </div>
+                )}
               </div>
-              <Button className="mt-4 w-full" onClick={onRenew} disabled={renewing}>
-                {renewing ? "Sending…" : `Renew for ${money(data.monthlyFee)}`}
+              <Button className="mt-4 w-full" onClick={onRenew} disabled={renewing || waiting}>
+                {renewing
+                  ? "Starting payment…"
+                  : waiting
+                    ? "Waiting for payment…"
+                    : method === "mpesa"
+                      ? `Pay ${money(data.monthlyFee)} with M-Pesa`
+                      : method === "card"
+                        ? `Pay ${money(data.monthlyFee)} by card`
+                        : `Renew for ${money(data.monthlyFee)}`}
               </Button>
+              {waiting && (
+                <p className="mt-2 text-center text-xs text-muted-foreground">
+                  Approve the prompt on your phone — this page updates automatically.
+                </p>
+              )}
+
 
               {data.renewals.length > 0 && (
                 <ul className="mt-4 divide-y">

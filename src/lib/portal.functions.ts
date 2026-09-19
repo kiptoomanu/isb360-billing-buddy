@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 
 const lookupSchema = z.object({
@@ -9,7 +10,9 @@ const lookupSchema = z.object({
 const renewSchema = lookupSchema.extend({
   method: z.enum(["mpesa", "cash", "bank", "card"]),
   reference: z.string().trim().max(80).optional(),
+  phone: z.string().trim().max(20).optional(),
 });
+
 
 export type PortalPlan = {
   name: string;
@@ -142,9 +145,24 @@ export const lookupAccount = createServerFn({ method: "POST" })
     return buildPortal(db, client);
   });
 
+export type RenewalStart = {
+  portal: PortalData;
+  renewalId: string;
+  /** "manual" = staff confirms, "mpesa" = STK push sent, "card" = redirect to checkout */
+  mode: "manual" | "mpesa" | "card";
+  checkoutUrl?: string;
+  message: string;
+};
+
+function originFrom(): string {
+  const req = getRequest();
+  const url = new URL(req.url);
+  return `${url.protocol}//${url.host}`;
+}
+
 export const requestRenewal = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => renewSchema.parse(data))
-  .handler(async ({ data }): Promise<PortalData> => {
+  .handler(async ({ data }): Promise<RenewalStart> => {
     const { db, client } = await findClient(data.account, data.fullName);
 
     const { data: pending } = await db
@@ -167,14 +185,111 @@ export const requestRenewal = createServerFn({ method: "POST" })
       if (plan?.price != null) amount = Number(plan.price);
     }
 
-    const { error } = await db.from("renewal_requests").insert({
-      client_id: client.id,
-      plan_id: client.plan_id,
-      amount,
-      method: data.method,
-      reference: data.reference?.trim() || null,
-    });
-    if (error) throw new Error(error.message);
+    const { data: inserted, error } = await db
+      .from("renewal_requests")
+      .insert({
+        client_id: client.id,
+        plan_id: client.plan_id,
+        amount,
+        method: data.method,
+        reference: data.reference?.trim() || null,
+      })
+      .select("id")
+      .single();
+    if (error || !inserted) throw new Error(error?.message ?? "Could not create the renewal request.");
+    const renewalId = inserted.id as string;
 
-    return buildPortal(db, client);
+    const fail = async (message: string) => {
+      await db
+        .from("renewal_requests")
+        .update({ status: "rejected", failure_reason: message })
+        .eq("id", renewalId);
+      throw new Error(message);
+    };
+
+    if (data.method === "mpesa") {
+      const { stkPush, normalizePhone } = await import("./mpesa.server");
+      const phone = normalizePhone(data.phone?.trim() || client.phone || "");
+      if (phone.length < 12) await fail("Please enter the M-Pesa phone number to charge.");
+      try {
+        const { checkoutId } = await stkPush({
+          phone,
+          amount,
+          accountRef: client.username || client.phone || "ISP360",
+          description: "Subscription",
+          callbackUrl: `${originFrom()}/api/public/mpesa/callback`,
+        });
+        await db
+          .from("renewal_requests")
+          .update({ gateway: "mpesa", checkout_id: checkoutId, payer_phone: phone })
+          .eq("id", renewalId);
+      } catch (e: any) {
+        await fail(e?.message ?? "M-Pesa could not start the payment.");
+      }
+      return {
+        portal: await buildPortal(db, client),
+        renewalId,
+        mode: "mpesa",
+        message: "Check your phone and enter your M-Pesa PIN to complete the payment.",
+      };
+    }
+
+    if (data.method === "card") {
+      const { createCheckoutSession } = await import("./stripe.server");
+      const origin = originFrom();
+      try {
+        const session = await createCheckoutSession({
+          amount,
+          description: "Internet subscription renewal",
+          renewalId,
+          successUrl: `${origin}/portal?paid=1`,
+          cancelUrl: `${origin}/portal?cancelled=1`,
+        });
+        await db
+          .from("renewal_requests")
+          .update({ gateway: "stripe", checkout_id: session.id })
+          .eq("id", renewalId);
+        return {
+          portal: await buildPortal(db, client),
+          renewalId,
+          mode: "card",
+          checkoutUrl: session.url,
+          message: "Opening secure card checkout…",
+        };
+      } catch (e: any) {
+        await fail(e?.message ?? "Card checkout could not be started.");
+      }
+    }
+
+    return {
+      portal: await buildPortal(db, client),
+      renewalId,
+      mode: "manual",
+      message: "Renewal request sent. Our team will confirm your payment shortly.",
+    };
   });
+
+export const checkRenewalStatus = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    lookupSchema.extend({ renewalId: z.string().uuid() }).parse(data),
+  )
+  .handler(async ({ data }): Promise<{ status: string; reason: string | null; portal: PortalData }> => {
+    const { db, client } = await findClient(data.account, data.fullName);
+    const { data: row } = await db
+      .from("renewal_requests")
+      .select("status, failure_reason, client_id")
+      .eq("id", data.renewalId)
+      .maybeSingle();
+    if (!row || row.client_id !== client.id) throw new Error("Payment not found.");
+    const { data: fresh } = await db
+      .from("clients")
+      .select("id, full_name, username, phone, type, status, monthly_fee, expiry_date, loyalty_points, plan_id")
+      .eq("id", client.id)
+      .single();
+    return {
+      status: row.status as string,
+      reason: (row.failure_reason as string | null) ?? null,
+      portal: await buildPortal(db, (fresh ?? client) as ClientRow),
+    };
+  });
+

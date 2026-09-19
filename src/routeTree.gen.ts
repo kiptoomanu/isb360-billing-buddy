@@ -35,7 +35,9 @@ import { Route as AppSettingsBrandingRouteImport } from './routes/_app/settings.
 import { Route as AppClientsStaticRouteImport } from './routes/_app/clients.static'
 import { Route as AppClientsPppoeRouteImport } from './routes/_app/clients.pppoe'
 import { Route as AppClientsHotspotRouteImport } from './routes/_app/clients.hotspot'
+import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe.webhook'
 import { Route as ApiPublicProvisionTokenRouteImport } from './routes/api/public/provision.$token'
+import { Route as ApiPublicMpesaCallbackRouteImport } from './routes/api/public/mpesa.callback'
 import { Route as ApiPublicProvisionTokenCheckinRouteImport } from './routes/api/public/provision.$token.checkin'
 
 const RewardsRoute = RewardsRouteImport.update({
@@ -168,9 +170,19 @@ const AppClientsHotspotRoute = AppClientsHotspotRouteImport.update({
   path: '/clients/hotspot',
   getParentRoute: () => AppRoute,
 } as any)
+const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
+  id: '/api/public/stripe/webhook',
+  path: '/api/public/stripe/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicProvisionTokenRoute = ApiPublicProvisionTokenRouteImport.update({
   id: '/api/public/provision/$token',
   path: '/api/public/provision/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicMpesaCallbackRoute = ApiPublicMpesaCallbackRouteImport.update({
+  id: '/api/public/mpesa/callback',
+  path: '/api/public/mpesa/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicProvisionTokenCheckinRoute =
@@ -206,7 +218,9 @@ export interface FileRoutesByFullPath {
   '/settings/pppoe': typeof AppSettingsPppoeRoute
   '/settings/whatsapp': typeof AppSettingsWhatsappRoute
   '/settings/': typeof AppSettingsIndexRoute
+  '/api/public/mpesa/callback': typeof ApiPublicMpesaCallbackRoute
   '/api/public/provision/$token': typeof ApiPublicProvisionTokenRouteWithChildren
+  '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
   '/api/public/provision/$token/checkin': typeof ApiPublicProvisionTokenCheckinRoute
 }
 export interface FileRoutesByTo {
@@ -234,7 +248,9 @@ export interface FileRoutesByTo {
   '/settings/pppoe': typeof AppSettingsPppoeRoute
   '/settings/whatsapp': typeof AppSettingsWhatsappRoute
   '/settings': typeof AppSettingsIndexRoute
+  '/api/public/mpesa/callback': typeof ApiPublicMpesaCallbackRoute
   '/api/public/provision/$token': typeof ApiPublicProvisionTokenRouteWithChildren
+  '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
   '/api/public/provision/$token/checkin': typeof ApiPublicProvisionTokenCheckinRoute
 }
 export interface FileRoutesById {
@@ -265,7 +281,9 @@ export interface FileRoutesById {
   '/_app/settings/pppoe': typeof AppSettingsPppoeRoute
   '/_app/settings/whatsapp': typeof AppSettingsWhatsappRoute
   '/_app/settings/': typeof AppSettingsIndexRoute
+  '/api/public/mpesa/callback': typeof ApiPublicMpesaCallbackRoute
   '/api/public/provision/$token': typeof ApiPublicProvisionTokenRouteWithChildren
+  '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
   '/api/public/provision/$token/checkin': typeof ApiPublicProvisionTokenCheckinRoute
 }
 export interface FileRouteTypes {
@@ -296,7 +314,9 @@ export interface FileRouteTypes {
     | '/settings/pppoe'
     | '/settings/whatsapp'
     | '/settings/'
+    | '/api/public/mpesa/callback'
     | '/api/public/provision/$token'
+    | '/api/public/stripe/webhook'
     | '/api/public/provision/$token/checkin'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -324,7 +344,9 @@ export interface FileRouteTypes {
     | '/settings/pppoe'
     | '/settings/whatsapp'
     | '/settings'
+    | '/api/public/mpesa/callback'
     | '/api/public/provision/$token'
+    | '/api/public/stripe/webhook'
     | '/api/public/provision/$token/checkin'
   id:
     | '__root__'
@@ -354,7 +376,9 @@ export interface FileRouteTypes {
     | '/_app/settings/pppoe'
     | '/_app/settings/whatsapp'
     | '/_app/settings/'
+    | '/api/public/mpesa/callback'
     | '/api/public/provision/$token'
+    | '/api/public/stripe/webhook'
     | '/api/public/provision/$token/checkin'
   fileRoutesById: FileRoutesById
 }
@@ -364,7 +388,9 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   PortalRoute: typeof PortalRoute
   RewardsRoute: typeof RewardsRoute
+  ApiPublicMpesaCallbackRoute: typeof ApiPublicMpesaCallbackRoute
   ApiPublicProvisionTokenRoute: typeof ApiPublicProvisionTokenRouteWithChildren
+  ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -551,11 +577,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppClientsHotspotRouteImport
       parentRoute: typeof AppRoute
     }
+    '/api/public/stripe/webhook': {
+      id: '/api/public/stripe/webhook'
+      path: '/api/public/stripe/webhook'
+      fullPath: '/api/public/stripe/webhook'
+      preLoaderRoute: typeof ApiPublicStripeWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/provision/$token': {
       id: '/api/public/provision/$token'
       path: '/api/public/provision/$token'
       fullPath: '/api/public/provision/$token'
       preLoaderRoute: typeof ApiPublicProvisionTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/mpesa/callback': {
+      id: '/api/public/mpesa/callback'
+      path: '/api/public/mpesa/callback'
+      fullPath: '/api/public/mpesa/callback'
+      preLoaderRoute: typeof ApiPublicMpesaCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/provision/$token/checkin': {
@@ -648,7 +688,9 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   PortalRoute: PortalRoute,
   RewardsRoute: RewardsRoute,
+  ApiPublicMpesaCallbackRoute: ApiPublicMpesaCallbackRoute,
   ApiPublicProvisionTokenRoute: ApiPublicProvisionTokenRouteWithChildren,
+  ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
