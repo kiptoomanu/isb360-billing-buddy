@@ -221,14 +221,20 @@ export type Database = {
       renewal_requests: {
         Row: {
           amount: number
+          checkout_id: string | null
           client_id: string
           confirmed_at: string | null
           confirmed_by: string | null
           created_at: string
           days_added: number | null
+          failure_reason: string | null
+          gateway: string | null
+          gateway_ref: string | null
           id: string
           method: string
           note: string | null
+          paid_at: string | null
+          payer_phone: string | null
           plan_id: string | null
           reference: string | null
           refund_amount: number | null
@@ -239,14 +245,20 @@ export type Database = {
         }
         Insert: {
           amount?: number
+          checkout_id?: string | null
           client_id: string
           confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string
           days_added?: number | null
+          failure_reason?: string | null
+          gateway?: string | null
+          gateway_ref?: string | null
           id?: string
           method?: string
           note?: string | null
+          paid_at?: string | null
+          payer_phone?: string | null
           plan_id?: string | null
           reference?: string | null
           refund_amount?: number | null
@@ -257,14 +269,20 @@ export type Database = {
         }
         Update: {
           amount?: number
+          checkout_id?: string | null
           client_id?: string
           confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string
           days_added?: number | null
+          failure_reason?: string | null
+          gateway?: string | null
+          gateway_ref?: string | null
           id?: string
           method?: string
           note?: string | null
+          paid_at?: string | null
+          payer_phone?: string | null
           plan_id?: string | null
           reference?: string | null
           refund_amount?: number | null
