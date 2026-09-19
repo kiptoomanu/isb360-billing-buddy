@@ -1,7 +1,13 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { lookupAccount, requestRenewal, type PortalData } from "@/lib/portal.functions";
+import {
+  lookupAccount,
+  requestRenewal,
+  checkRenewalStatus,
+  type PortalData,
+} from "@/lib/portal.functions";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
