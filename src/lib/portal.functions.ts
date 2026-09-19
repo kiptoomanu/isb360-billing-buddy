@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 
 const lookupSchema = z.object({
@@ -9,7 +10,9 @@ const lookupSchema = z.object({
 const renewSchema = lookupSchema.extend({
   method: z.enum(["mpesa", "cash", "bank", "card"]),
   reference: z.string().trim().max(80).optional(),
+  phone: z.string().trim().max(20).optional(),
 });
+
 
 export type PortalPlan = {
   name: string;
