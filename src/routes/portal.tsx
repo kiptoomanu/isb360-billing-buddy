@@ -312,19 +312,45 @@ function PortalPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="reference">Payment reference (optional)</Label>
-                  <Input
-                    id="reference"
-                    value={reference}
-                    onChange={(e) => setReference(e.target.value)}
-                    placeholder="e.g. M-Pesa code"
-                  />
-                </div>
+                {method === "mpesa" ? (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="phone">M-Pesa phone number</Label>
+                    <Input
+                      id="phone"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder={data.account ?? "07XXXXXXXX"}
+                    />
+                  </div>
+                ) : (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="reference">Payment reference (optional)</Label>
+                    <Input
+                      id="reference"
+                      value={reference}
+                      onChange={(e) => setReference(e.target.value)}
+                      placeholder="e.g. bank slip number"
+                    />
+                  </div>
+                )}
               </div>
-              <Button className="mt-4 w-full" onClick={onRenew} disabled={renewing}>
-                {renewing ? "Sending…" : `Renew for ${money(data.monthlyFee)}`}
+              <Button className="mt-4 w-full" onClick={onRenew} disabled={renewing || waiting}>
+                {renewing
+                  ? "Starting payment…"
+                  : waiting
+                    ? "Waiting for payment…"
+                    : method === "mpesa"
+                      ? `Pay ${money(data.monthlyFee)} with M-Pesa`
+                      : method === "card"
+                        ? `Pay ${money(data.monthlyFee)} by card`
+                        : `Renew for ${money(data.monthlyFee)}`}
               </Button>
+              {waiting && (
+                <p className="mt-2 text-center text-xs text-muted-foreground">
+                  Approve the prompt on your phone — this page updates automatically.
+                </p>
+              )}
+
 
               {data.renewals.length > 0 && (
                 <ul className="mt-4 divide-y">
