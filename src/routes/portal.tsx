@@ -61,15 +61,21 @@ const tierOf = (p: number) =>
 function PortalPage() {
   const lookup = useServerFn(lookupAccount);
   const renew = useServerFn(requestRenewal);
+  const checkStatus = useServerFn(checkRenewalStatus);
   const [account, setAccount] = useState("");
   const [fullName, setFullName] = useState("");
   const [method, setMethod] = useState<"mpesa" | "cash" | "bank" | "card">("mpesa");
   const [reference, setReference] = useState("");
+  const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [renewing, setRenewing] = useState(false);
+  const [waiting, setWaiting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [data, setData] = useState<PortalData | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => () => { if (pollRef.current) clearInterval(pollRef.current); }, []);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,23 +92,62 @@ function PortalPage() {
     }
   };
 
+  const watchPayment = (renewalId: string) => {
+    setWaiting(true);
+    const started = Date.now();
+    if (pollRef.current) clearInterval(pollRef.current);
+    pollRef.current = setInterval(async () => {
+      try {
+        const res = await checkStatus({ data: { account, fullName, renewalId } });
+        setData(res.portal);
+        if (res.status === "confirmed") {
+          clearInterval(pollRef.current!);
+          setWaiting(false);
+          setNotice("Payment received — your subscription has been extended.");
+        } else if (res.status === "rejected" || res.status === "refunded") {
+          clearInterval(pollRef.current!);
+          setWaiting(false);
+          setError(res.reason ?? "The payment was not completed.");
+        } else if (Date.now() - started > 180_000) {
+          clearInterval(pollRef.current!);
+          setWaiting(false);
+          setNotice("We are still waiting for your payment confirmation.");
+        }
+      } catch {
+        /* keep polling */
+      }
+    }, 4000);
+  };
+
   const onRenew = async () => {
     setRenewing(true);
     setError(null);
     setNotice(null);
     try {
       const res = await renew({
-        data: { account, fullName, method, reference: reference || undefined },
+        data: {
+          account,
+          fullName,
+          method,
+          reference: reference || undefined,
+          phone: phone || undefined,
+        },
       });
-      setData(res);
+      setData(res.portal);
       setReference("");
-      setNotice("Renewal request sent. Our team will confirm your payment shortly.");
+      setNotice(res.message);
+      if (res.mode === "card" && res.checkoutUrl) {
+        window.location.href = res.checkoutUrl;
+        return;
+      }
+      if (res.mode === "mpesa") watchPayment(res.renewalId);
     } catch (err: any) {
       setError(err?.message ?? "We could not send your renewal request.");
     } finally {
       setRenewing(false);
     }
   };
+
 
   const used = data?.daysUsed ?? 0;
   const pct = data && data.validityDays > 0 ? Math.round((used / data.validityDays) * 100) : 0;
