@@ -169,3 +169,20 @@ export const hotspotStatus = createServerFn({ method: "POST" })
     const { data: c } = await db.from("clients").select("username, expiry_date").eq("id", row.client_id).single();
     return { status: "confirmed", reason: null, code: c?.username as string, expiry: c?.expiry_date as string };
   });
+
+export const verifyHotspotLogin = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ username: z.string().trim().min(3).max(60) }).parse(d))
+  .handler(async ({ data }) => {
+    const db = await admin();
+    const value = data.username.replace(/[,)("']/g, "");
+    const { data: rows } = await db
+      .from("clients")
+      .select("username, status, expiry_date, type")
+      .or(`username.eq.${value},username.eq.${value.toUpperCase()}`)
+      .limit(1);
+    const c = rows?.[0];
+    if (!c) throw new Error("We couldn't find that code or account.");
+    const expired = c.expiry_date && new Date(`${c.expiry_date}T23:59:59Z`).getTime() < Date.now();
+    if (c.status !== "active" || expired) throw new Error("This code or account has expired. Buy a package below to reconnect.");
+    return { username: c.username as string, expiry: c.expiry_date as string | null };
+  });

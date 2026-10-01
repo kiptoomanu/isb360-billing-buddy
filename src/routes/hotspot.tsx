@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { listHotspotPlans, purchaseHotspot, hotspotStatus, type HotspotPlan } from "@/lib/hotspot.functions";
+import { verifyHotspotLogin, listHotspotPlans, purchaseHotspot, hotspotStatus, type HotspotPlan } from "@/lib/hotspot.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -60,6 +60,33 @@ function HotspotPage() {
   );
   const [code, setCode] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const verify = useServerFn(verifyHotspotLogin);
+  const [tab, setTab] = useState<"buy" | "voucher" | "account">("buy");
+  const [voucher, setVoucher] = useState("");
+  const [user, setUser] = useState("");
+  const [pass, setPass] = useState("");
+  const [creds, setCreds] = useState<{ u: string; p: string } | null>(null);
+  const loginRef = useRef<HTMLFormElement>(null);
+
+  async function signIn(u: string, p: string) {
+    setBusy(true);
+    setErr(null);
+    setMsg(null);
+    try {
+      const r = await verify({ data: { username: u } });
+      if (!search.login) {
+        setMsg("Code accepted. Enter it on the Wi-Fi login page to connect.");
+        return;
+      }
+      setCreds({ u: r.username, p: p || r.username });
+      setMsg("Connecting…");
+      setTimeout(() => loginRef.current?.submit(), 300);
+    } catch (e: any) {
+      setErr(e?.message ?? "Could not sign in.");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   useEffect(() => {
     if (!pending) return;
@@ -145,6 +172,36 @@ function HotspotPage() {
           </Card>
         ) : (
           <>
+            <div className="grid grid-cols-3 gap-1 rounded-lg border p-1">
+              {(["buy", "voucher", "account"] as const).map((t) => (
+                <button key={t} type="button" onClick={() => { setTab(t); setErr(null); setMsg(null); }}
+                  className={cn("rounded-md py-2 text-sm font-medium", tab === t ? "bg-primary text-primary-foreground" : "text-muted-foreground")}>
+                  {t === "buy" ? "Buy package" : t === "voucher" ? "Voucher" : "My account"}
+                </button>
+              ))}
+            </div>
+            {tab === "voucher" && (
+              <Card className="space-y-3 p-4">
+                <Label>Voucher / access code</Label>
+                <Input value={voucher} onChange={(e) => setVoucher(e.target.value.toUpperCase())} placeholder="HSXXXXXXXX" className="font-mono tracking-widest" />
+                <Button className="w-full" disabled={busy || voucher.length < 3} onClick={() => signIn(voucher.trim(), voucher.trim())}>Connect</Button>
+              </Card>
+            )}
+            {tab === "account" && (
+              <Card className="space-y-3 p-4">
+                <div className="grid gap-2"><Label>Username</Label><Input value={user} onChange={(e) => setUser(e.target.value)} /></div>
+                <div className="grid gap-2"><Label>Password</Label><Input type="password" value={pass} onChange={(e) => setPass(e.target.value)} /></div>
+                <Button className="w-full" disabled={busy || user.length < 3} onClick={() => signIn(user.trim(), pass)}>Log in</Button>
+              </Card>
+            )}
+            {creds && search.login && (
+              <form ref={loginRef} method="post" action={search.login} className="hidden">
+                <input type="hidden" name="username" value={creds.u} />
+                <input type="hidden" name="password" value={creds.p} />
+                {search.dst && <input type="hidden" name="dst" value={search.dst} />}
+              </form>
+            )}
+            {tab === "buy" && (<>
             <div className="grid gap-3">
               {plans.isLoading && <p className="text-center text-sm text-muted-foreground">Loading packages…</p>}
               {plans.data?.length === 0 && <p className="text-center text-sm text-muted-foreground">No packages available right now.</p>}
@@ -183,6 +240,7 @@ function HotspotPage() {
                 </Button>
               </Card>
             )}
+            </>)}
           </>
         )}
 
