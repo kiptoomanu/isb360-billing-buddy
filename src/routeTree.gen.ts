@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PortalRouteImport } from './routes/portal'
+import { Route as HotspotRouteImport } from './routes/hotspot'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
@@ -54,6 +55,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const PortalRoute = PortalRouteImport.update({
   id: '/portal',
   path: '/portal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HotspotRoute = HotspotRouteImport.update({
+  id: '/hotspot',
+  path: '/hotspot',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -201,6 +207,7 @@ const ApiPublicProvisionTokenCheckinRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/hotspot': typeof HotspotRoute
   '/portal': typeof PortalRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
@@ -233,6 +240,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/hotspot': typeof HotspotRoute
   '/portal': typeof PortalRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
@@ -266,6 +274,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
+  '/hotspot': typeof HotspotRoute
   '/portal': typeof PortalRoute
   '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
@@ -300,6 +309,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/hotspot'
     | '/portal'
     | '/reset-password'
     | '/rewards'
@@ -332,6 +342,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/hotspot'
     | '/portal'
     | '/reset-password'
     | '/rewards'
@@ -364,6 +375,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_app'
     | '/auth'
+    | '/hotspot'
     | '/portal'
     | '/reset-password'
     | '/rewards'
@@ -398,6 +410,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRoute
+  HotspotRoute: typeof HotspotRoute
   PortalRoute: typeof PortalRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   RewardsRoute: typeof RewardsRoute
@@ -427,6 +440,13 @@ declare module '@tanstack/react-router' {
       path: '/portal'
       fullPath: '/portal'
       preLoaderRoute: typeof PortalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hotspot': {
+      id: '/hotspot'
+      path: '/hotspot'
+      fullPath: '/hotspot'
+      preLoaderRoute: typeof HotspotRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -706,6 +726,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRoute,
+  HotspotRoute: HotspotRoute,
   PortalRoute: PortalRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   RewardsRoute: RewardsRoute,
