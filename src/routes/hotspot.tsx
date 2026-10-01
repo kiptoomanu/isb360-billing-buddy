@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import { listHotspotPlans, purchaseHotspot, hotspotStatus, type HotspotPlan } from "@/lib/hotspot.functions";
 import { Button } from "@/components/ui/button";
@@ -46,7 +45,10 @@ function HotspotPage() {
   const fetchPlans = useServerFn(listHotspotPlans);
   const buy = useServerFn(purchaseHotspot);
   const status = useServerFn(hotspotStatus);
-  const plans = useQuery({ queryKey: ["hotspot-plans"], queryFn: () => fetchPlans() });
+  const [plans, setPlans] = useState<{ isLoading: boolean; data?: HotspotPlan[] }>({ isLoading: true });
+  useEffect(() => {
+    fetchPlans().then((d) => setPlans({ isLoading: false, data: d })).catch(() => setPlans({ isLoading: false, data: [] }));
+  }, [fetchPlans]);
 
   const [plan, setPlan] = useState<HotspotPlan | null>(null);
   const [phone, setPhone] = useState(search.p ?? "");
