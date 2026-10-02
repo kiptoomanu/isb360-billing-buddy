@@ -49,6 +49,13 @@ const gateways: Gateway[] = [
     ],
   },
   {
+    id: "till_manual", name: "Till — Without API keys", subtitle: "M-Pesa · Kenya", tags: ["Till", "Buy Goods"], settlement: "Manual confirmation", icon: Smartphone,
+    fields: [
+      { key: "till", label: "Till number" },
+      { key: "till_name", label: "Business name shown on M-Pesa", placeholder: "e.g. MANUNET" },
+    ],
+  },
+  {
     id: "kopokopo", name: "Kopo Kopo", subtitle: "Kopo Kopo · Kenya", tags: ["Mobile Money till"], settlement: "T+1 to bank", icon: CreditCard,
     fields: [
       { key: "till", label: "Till number" },
