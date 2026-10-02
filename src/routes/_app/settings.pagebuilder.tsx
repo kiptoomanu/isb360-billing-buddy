@@ -139,6 +139,9 @@ function PageBuilder() {
             <Button variant="secondary" onClick={() => toast.info("Preview updated on the right")}>
               <Eye className="mr-2 h-4 w-4" /> Preview
             </Button>
+            <Button variant="outline" asChild>
+              <a href="/hotspot" target="_blank" rel="noreferrer"><Eye className="mr-2 h-4 w-4" /> Open live portal</a>
+            </Button>
             <Button onClick={publish} disabled={saving}>
               <Save className="mr-2 h-4 w-4" /> {saving ? "Saving..." : "Save & Upload"}
             </Button>

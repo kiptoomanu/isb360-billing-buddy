@@ -186,3 +186,30 @@ export const verifyHotspotLogin = createServerFn({ method: "POST" })
     if (c.status !== "active" || expired) throw new Error("This code or account has expired. Buy a package below to reconnect.");
     return { username: c.username as string, expiry: c.expiry_date as string | null };
   });
+
+export type PortalDesign = {
+  blocks: string[];
+  title: string;
+  subtitle: string;
+  brandColor: string;
+  supportPhone: string;
+  footer: string;
+  notice: string | null;
+};
+
+export const getPortalDesign = createServerFn({ method: "GET" }).handler(async (): Promise<PortalDesign> => {
+  const db = await admin();
+  const { data } = await db.from("app_settings").select("data").eq("section", "pagebuilder").maybeSingle();
+  const d = (data?.data ?? {}) as Record<string, any>;
+  const s = (v: unknown, f: string) => (typeof v === "string" && v.trim() ? v.slice(0, 200) : f);
+  const color = s(d.brand_color, "#FA8200");
+  return {
+    blocks: Array.isArray(d.enabled_blocks) ? d.enabled_blocks.filter((b: unknown) => typeof b === "string") : ["header", "welcome", "pricing", "login", "mpesa", "support"],
+    title: s(d.page_title, "CHECK OUR PRICING"),
+    subtitle: s(d.page_subtitle, "Choose a plan that fits your needs."),
+    brandColor: /^#[0-9a-fA-F]{3,8}$/.test(color) ? color : "#FA8200",
+    supportPhone: s(d.support_phone, ""),
+    footer: s(d.footer_note, "Powered by ISP360 Billing System"),
+    notice: typeof d.notice_text === "string" && d.notice_text.trim() ? d.notice_text.slice(0, 300) : null,
+  };
+});

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { verifyHotspotLogin, listHotspotPlans, purchaseHotspot, hotspotStatus, type HotspotPlan } from "@/lib/hotspot.functions";
+import { getPortalDesign, type PortalDesign, verifyHotspotLogin, listHotspotPlans, purchaseHotspot, hotspotStatus, type HotspotPlan } from "@/lib/hotspot.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -49,6 +49,18 @@ function HotspotPage() {
   useEffect(() => {
     fetchPlans().then((d) => setPlans({ isLoading: false, data: d })).catch(() => setPlans({ isLoading: false, data: [] }));
   }, [fetchPlans]);
+
+  const designFn = useServerFn(getPortalDesign);
+  const [design, setDesign] = useState<PortalDesign | null>(null);
+  useEffect(() => {
+    designFn().then((d) => {
+      setDesign(d);
+      const li = d.blocks.indexOf("login"), pi = d.blocks.indexOf("pricing");
+      if (li >= 0 && (pi < 0 || li < pi)) setTab("voucher");
+    }).catch(() => {});
+  }, [designFn]);
+  const has = (b: string) => !design || design.blocks.includes(b);
+  const tabs = (["buy", "voucher", "account"] as const).filter((t) => t === "buy" ? has("pricing") || has("mpesa") || !has("login") : has("login"));
 
   const [plan, setPlan] = useState<HotspotPlan | null>(null);
   const [phone, setPhone] = useState(search.p ?? "");
@@ -138,14 +150,15 @@ function HotspotPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background px-4 py-8">
+    <div className="min-h-screen bg-background px-4 py-8" style={design ? ({ "--primary": design.brandColor } as React.CSSProperties) : undefined}>
       <div className="mx-auto max-w-md space-y-5">
         <div className="text-center">
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary/15 text-primary">
             <Wifi className="h-6 w-6" />
           </div>
-          <h1 className="text-2xl font-bold">Get online</h1>
-          <p className="text-sm text-muted-foreground">Pick a package, pay, and you're connected automatically.</p>
+          <h1 className="text-2xl font-bold">{design?.title ?? "Get online"}</h1>
+          <p className="text-sm text-muted-foreground">{design?.subtitle ?? "Pick a package, pay, and you're connected automatically."}</p>
+          {design?.supportPhone && has("header") && <p className="mt-1 text-xs text-muted-foreground">Support: {design.supportPhone}</p>}
         </div>
 
         {code ? (
@@ -172,8 +185,9 @@ function HotspotPage() {
           </Card>
         ) : (
           <>
-            <div className="grid grid-cols-3 gap-1 rounded-lg border p-1">
-              {(["buy", "voucher", "account"] as const).map((t) => (
+            {design?.notice && has("notice") && <Card className="border-primary/40 bg-primary/10 p-3 text-sm">{design.notice}</Card>}
+            <div className="grid gap-1 rounded-lg border p-1" style={{ gridTemplateColumns: `repeat(${tabs.length}, 1fr)` }}>
+              {tabs.map((t) => (
                 <button key={t} type="button" onClick={() => { setTab(t); setErr(null); setMsg(null); }}
                   className={cn("rounded-md py-2 text-sm font-medium", tab === t ? "bg-primary text-primary-foreground" : "text-muted-foreground")}>
                   {t === "buy" ? "Buy package" : t === "voucher" ? "Voucher" : "My account"}
@@ -246,6 +260,10 @@ function HotspotPage() {
 
         {err && <p className="text-center text-sm text-destructive">{err}</p>}
         {msg && !pending && !code && <p className="text-center text-sm text-muted-foreground">{msg}</p>}
+        {design && has("support") && design.supportPhone && (
+          <a href={`tel:${design.supportPhone}`} className="block text-center text-sm text-primary">Need help? Call {design.supportPhone}</a>
+        )}
+        {design?.footer && <p className="text-center text-xs text-muted-foreground">{design.footer}</p>}
       </div>
     </div>
   );
