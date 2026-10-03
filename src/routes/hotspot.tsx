@@ -56,7 +56,7 @@ function HotspotPage() {
     designFn().then((d) => {
       setDesign(d);
       const li = d.blocks.indexOf("login"), pi = d.blocks.indexOf("pricing");
-      if (li >= 0 && (pi < 0 || li < pi)) setTab("voucher");
+      if (d.template === "badge" || (li >= 0 && (pi < 0 || li < pi))) setTab("voucher");
     }).catch(() => {});
   }, [designFn]);
   const has = (b: string) => !design || design.blocks.includes(b);
@@ -156,8 +156,11 @@ function HotspotPage() {
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary/15 text-primary">
             <Wifi className="h-6 w-6" />
           </div>
-          <h1 className="text-2xl font-bold">{design?.title ?? "Get online"}</h1>
-          <p className="text-sm text-muted-foreground">{design?.subtitle ?? "Pick a package, pay, and you're connected automatically."}</p>
+          {design?.template === "classic" && design.supportPhone && (
+            <a href={`tel:${design.supportPhone}`} className="mb-3 inline-block rounded-md bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground">{design.supportPhone}</a>
+          )}
+          <h1 className="text-2xl font-bold">{design?.template === "aurora" ? design.welcomeTitle : design?.title ?? "Get online"}</h1>
+          <p className="text-sm text-muted-foreground">{design?.template === "aurora" ? design.welcomeText : design?.subtitle ?? "Pick a package, pay, and you're connected automatically."}</p>
           {design?.supportPhone && has("header") && <p className="mt-1 text-xs text-muted-foreground">Support: {design.supportPhone}</p>}
         </div>
 
@@ -216,7 +219,7 @@ function HotspotPage() {
               </form>
             )}
             {tab === "buy" && (<>
-            <div className="grid gap-3">
+            <div className={cn("grid gap-3", design?.template === "tiles" && "grid-cols-2")}>
               {plans.isLoading && <p className="text-center text-sm text-muted-foreground">Loading packages…</p>}
               {plans.data?.length === 0 && <p className="text-center text-sm text-muted-foreground">No packages available right now.</p>}
               {plans.data?.map((p) => (
@@ -226,6 +229,7 @@ function HotspotPage() {
                   onClick={() => setPlan(p)}
                   className={cn(
                     "flex items-center justify-between rounded-lg border p-4 text-left transition-colors",
+                    design?.template === "tiles" && "flex-col items-start gap-2 bg-primary/5",
                     plan?.id === p.id ? "border-primary bg-primary/10" : "hover:bg-muted/50",
                   )}
                 >
@@ -235,7 +239,7 @@ function HotspotPage() {
                       {speed(p.download_kbps)} · {validity(p.validity_days)} · {p.device_limit} device{p.device_limit > 1 ? "s" : ""}
                     </div>
                   </div>
-                  <div className="text-lg font-bold text-primary">{money(Number(p.price))}</div>
+                  {design?.showPrices !== false && <div className="text-lg font-bold text-primary">{money(Number(p.price))}</div>}
                 </button>
               ))}
             </div>

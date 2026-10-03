@@ -195,12 +195,19 @@ export type PortalDesign = {
   supportPhone: string;
   footer: string;
   notice: string | null;
+  template: "aurora" | "badge" | "classic" | "tiles";
+  welcomeTitle: string;
+  welcomeText: string;
+  showPrices: boolean;
 };
 
 export const getPortalDesign = createServerFn({ method: "GET" }).handler(async (): Promise<PortalDesign> => {
   const db = await admin();
   const { data } = await db.from("app_settings").select("data").eq("section", "pagebuilder").maybeSingle();
   const d = (data?.data ?? {}) as Record<string, any>;
+  const { data: hs } = await db.from("app_settings").select("data").eq("section", "hotspot").maybeSingle();
+  const h = (hs?.data ?? {}) as Record<string, any>;
+  const tpl = ["aurora", "badge", "classic", "tiles"].includes(h.portal_template) ? h.portal_template : "aurora";
   const s = (v: unknown, f: string) => (typeof v === "string" && v.trim() ? v.slice(0, 200) : f);
   const color = s(d.brand_color, "#FA8200");
   return {
@@ -210,6 +217,10 @@ export const getPortalDesign = createServerFn({ method: "GET" }).handler(async (
     brandColor: /^#[0-9a-fA-F]{3,8}$/.test(color) ? color : "#FA8200",
     supportPhone: s(d.support_phone, ""),
     footer: s(d.footer_note, "Powered by ISP360 Billing System"),
+    template: tpl,
+    welcomeTitle: s(h.welcome_title, "Welcome to Our Network"),
+    welcomeText: s(h.welcome_text, "Already have an account or voucher code? Connect now to access high-speed internet."),
+    showPrices: h.show_prices !== false,
     notice: typeof d.notice_text === "string" && d.notice_text.trim() ? d.notice_text.slice(0, 300) : null,
   };
 });
