@@ -33,12 +33,16 @@ const gateways: Gateway[] = [
     ],
   },
   {
-    id: "mpesa_api", name: "M-Pesa Paybill / Till (API keys)", subtitle: "M-Pesa · Kenya", tags: ["STK", "Paybill", "Till"], settlement: "Instant", icon: Smartphone,
+    id: "mpesa_api", name: "M-Pesa Paybill / Till (API keys)", subtitle: "M-Pesa · Kenya — sends a PIN prompt to the client's phone", tags: ["STK", "Paybill", "Till", "Bank"], settlement: "Instant", icon: Smartphone,
     fields: [
-      { key: "shortcode", label: "Shortcode" },
+      { key: "type", label: "Receive money via", placeholder: "paybill or till" },
+      { key: "shortcode", label: "Paybill / Store number (shortcode)" },
+      { key: "till_number", label: "Till number (only for till)", placeholder: "Leave blank for paybill" },
+      { key: "account_reference", label: "Bank account number (optional)", placeholder: "Leave blank to use client code" },
       { key: "consumer_key", label: "Consumer key" },
       { key: "consumer_secret", label: "Consumer secret" },
       { key: "passkey", label: "Passkey" },
+      { key: "environment", label: "Environment", placeholder: "live or sandbox" },
     ],
   },
   {
