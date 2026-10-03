@@ -31,6 +31,55 @@ const defaults = {
   show_prices: true,
 };
 
+const samplePlans = [["1 HOUR", 10], ["4 hours", 15], ["7 hours", 20], ["10 hours", 25]] as const;
+
+function PhonePreview({ id, title, text }: { id: string; title: string; text: string }) {
+  if (id === "badge") {
+    return (
+      <div className="mt-6 space-y-1.5 rounded-lg border p-2 text-center">
+        <p className="text-[8px] text-muted-foreground">Enter your voucher code to activate WiFi</p>
+        <div className="rounded border px-1 py-1 text-left font-mono text-[8px] text-muted-foreground">XXXX-XXXX</div>
+        <div className="rounded bg-primary py-1 text-[8px] font-semibold text-primary-foreground">Redeem voucher</div>
+        <p className="text-[7px] underline">No voucher? Pay with Mobile Money</p>
+      </div>
+    );
+  }
+  if (id === "tiles") {
+    return (
+      <div className="space-y-1.5">
+        <p className="text-center text-[8px] text-muted-foreground">Pick a tag, enter your number, and pay</p>
+        <div className="grid grid-cols-2 gap-1">
+          {samplePlans.map(([n, p]) => (
+            <div key={n} className="rounded bg-primary/15 p-1.5 text-center">
+              <div className="text-[7px] font-semibold">{n}</div>
+              <div className="text-[9px] font-bold text-primary">Ksh {p}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="space-y-1.5">
+      {id === "classic" ? (
+        <div className="mx-auto w-fit rounded bg-primary px-2 py-0.5 text-[8px] text-primary-foreground">Support line</div>
+      ) : (
+        <div className="text-center">
+          <div className="text-[9px] font-semibold">{title}</div>
+          <p className="line-clamp-2 text-[7px] text-muted-foreground">{text}</p>
+          <div className="mt-1 rounded bg-primary py-1 text-[8px] font-semibold text-primary-foreground">Connect to Network</div>
+        </div>
+      )}
+      {samplePlans.map(([n, p]) => (
+        <div key={n} className="flex items-center justify-between rounded border px-1.5 py-1">
+          <div><div className="text-[7px] font-semibold">{n}</div><div className="text-[7px] text-primary">Ksh {p}</div></div>
+          <span className="rounded bg-primary px-1.5 text-[7px] text-primary-foreground">Buy</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function HotspotSettings() {
   const { values, set, save, saving } = useSettings("hotspot", defaults);
 
@@ -42,29 +91,24 @@ function HotspotSettings() {
         description="Captive-portal subscribers and prepaid vouchers — portal look, account lifecycle, and the payment steps shown to buyers."
       />
 
-      <SettingsCard title="Portal template" description="Pick a look for your hotspot login page.">
-        <div className="grid gap-3 sm:grid-cols-2">
+      <SettingsCard title="Portal template" description="Pick a look. This is exactly what customers see on the Wi-Fi login page.">
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           {templates.map((t) => {
             const active = values.portal_template === t.id;
             return (
-              <button
-                type="button"
-                key={t.id}
-                onClick={() => set("portal_template", t.id)}
-                className={cn(
-                  "rounded-lg border p-4 text-left transition-colors",
-                  active ? "border-primary bg-primary/5" : "hover:bg-muted/50",
-                )}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">{t.name}</span>
-                  {active && <Check className="h-4 w-4 text-primary" />}
+              <button type="button" key={t.id} onClick={() => set("portal_template", t.id)} className="text-left">
+                <div className={cn("relative mx-auto aspect-[9/17] w-full max-w-[200px] overflow-hidden rounded-[28px] border-[6px] bg-background p-2 transition", active ? "border-primary" : "border-foreground/80")}>
+                  <div className="mx-auto mb-2 h-3 w-16 rounded-full bg-foreground/80" />
+                  <PhonePreview id={t.id} title={values.welcome_title} text={values.welcome_text} />
+                  {active && <Check className="absolute right-2 top-2 h-4 w-4 rounded-full bg-primary p-0.5 text-primary-foreground" />}
                 </div>
-                <p className="mt-1 text-xs text-muted-foreground">{t.blurb}</p>
+                <div className="mt-2 text-center font-medium">{t.name}</div>
+                <p className="text-center text-xs text-muted-foreground">{t.blurb}</p>
               </button>
             );
           })}
         </div>
+        <a href="/hotspot" target="_blank" rel="noreferrer" className="text-sm font-medium text-primary">Open the live customer portal ↗</a>
       </SettingsCard>
 
       <SettingsCard title="Portal copy" description="Wording subscribers see before they connect.">
