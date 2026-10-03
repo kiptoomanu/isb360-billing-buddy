@@ -60,6 +60,14 @@ const gateways: Gateway[] = [
     ],
   },
   {
+    id: "mpesa_phone", name: "Send Money — Safaricom number", subtitle: "M-Pesa · Kenya · Pochi la Biashara / personal line", tags: ["Send Money", "Pochi"], settlement: "Manual confirmation", icon: Smartphone,
+    fields: [
+      { key: "phone", label: "Safaricom number to receive money", placeholder: "07XXXXXXXX" },
+      { key: "name", label: "Registered M-Pesa name", placeholder: "e.g. EMMANUEL KIPSANG" },
+      { key: "instructions", label: "Instructions for clients", placeholder: "Send money then share the M-Pesa code" },
+    ],
+  },
+  {
     id: "kopokopo", name: "Kopo Kopo", subtitle: "Kopo Kopo · Kenya", tags: ["Mobile Money till"], settlement: "T+1 to bank", icon: CreditCard,
     fields: [
       { key: "till", label: "Till number" },
