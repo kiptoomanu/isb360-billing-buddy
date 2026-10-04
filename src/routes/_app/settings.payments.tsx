@@ -11,6 +11,7 @@ import {
 import { cn } from "@/lib/utils";
 import { SettingsHeader } from "@/components/settings/SettingsShell";
 import { useSettings } from "@/lib/useSettings";
+import { MpesaPromptCard } from "@/components/settings/MpesaPromptCard";
 import { Building2, ChevronRight, CreditCard, Smartphone, Landmark, Globe } from "lucide-react";
 
 type Gateway = {
@@ -117,6 +118,12 @@ function PaymentsSettings() {
         title=""
         accent="Payments"
         description="Pick one gateway so subscribers can pay you. Only one is active at a time — switching is one click and saved credentials are kept."
+      />
+
+      <MpesaPromptCard
+        value={configs.mpesa_api ?? {}}
+        saving={saving}
+        onSave={(c) => save({ configs: { ...configs, mpesa_api: c }, active: "mpesa_api" })}
       />
 
       <p className="text-xs font-semibold tracking-wider text-muted-foreground">

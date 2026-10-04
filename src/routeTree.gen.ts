@@ -23,6 +23,7 @@ import { Route as AppPlansRouteImport } from './routes/_app/plans'
 import { Route as AppLoyaltyRouteImport } from './routes/_app/loyalty'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppBillingRouteImport } from './routes/_app/billing'
+import { Route as AppApprovalsRouteImport } from './routes/_app/approvals'
 import { Route as AppSplatRouteImport } from './routes/_app/$'
 import { Route as AppSettingsIndexRouteImport } from './routes/_app/settings.index'
 import { Route as AppSettingsWhatsappRouteImport } from './routes/_app/settings.whatsapp'
@@ -109,6 +110,11 @@ const AppDashboardRoute = AppDashboardRouteImport.update({
 const AppBillingRoute = AppBillingRouteImport.update({
   id: '/billing',
   path: '/billing',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppApprovalsRoute = AppApprovalsRouteImport.update({
+  id: '/approvals',
+  path: '/approvals',
   getParentRoute: () => AppRoute,
 } as any)
 const AppSplatRoute = AppSplatRouteImport.update({
@@ -212,6 +218,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
   '/$': typeof AppSplatRoute
+  '/approvals': typeof AppApprovalsRoute
   '/billing': typeof AppBillingRoute
   '/dashboard': typeof AppDashboardRoute
   '/loyalty': typeof AppLoyaltyRoute
@@ -245,6 +252,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
   '/$': typeof AppSplatRoute
+  '/approvals': typeof AppApprovalsRoute
   '/billing': typeof AppBillingRoute
   '/dashboard': typeof AppDashboardRoute
   '/loyalty': typeof AppLoyaltyRoute
@@ -279,6 +287,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/rewards': typeof RewardsRoute
   '/_app/$': typeof AppSplatRoute
+  '/_app/approvals': typeof AppApprovalsRoute
   '/_app/billing': typeof AppBillingRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/loyalty': typeof AppLoyaltyRoute
@@ -314,6 +323,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/rewards'
     | '/$'
+    | '/approvals'
     | '/billing'
     | '/dashboard'
     | '/loyalty'
@@ -347,6 +357,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/rewards'
     | '/$'
+    | '/approvals'
     | '/billing'
     | '/dashboard'
     | '/loyalty'
@@ -380,6 +391,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/rewards'
     | '/_app/$'
+    | '/_app/approvals'
     | '/_app/billing'
     | '/_app/dashboard'
     | '/_app/loyalty'
@@ -517,6 +529,13 @@ declare module '@tanstack/react-router' {
       path: '/billing'
       fullPath: '/billing'
       preLoaderRoute: typeof AppBillingRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/approvals': {
+      id: '/_app/approvals'
+      path: '/approvals'
+      fullPath: '/approvals'
+      preLoaderRoute: typeof AppApprovalsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/$': {
@@ -680,6 +699,7 @@ const AppSettingsRouteWithChildren = AppSettingsRoute._addFileChildren(
 
 interface AppRouteChildren {
   AppSplatRoute: typeof AppSplatRoute
+  AppApprovalsRoute: typeof AppApprovalsRoute
   AppBillingRoute: typeof AppBillingRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppLoyaltyRoute: typeof AppLoyaltyRoute
@@ -694,6 +714,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppSplatRoute: AppSplatRoute,
+  AppApprovalsRoute: AppApprovalsRoute,
   AppBillingRoute: AppBillingRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppLoyaltyRoute: AppLoyaltyRoute,
