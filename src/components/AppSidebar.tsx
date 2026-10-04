@@ -61,6 +61,7 @@ const finance: Item[] = [
 
 const ops: Item[] = [
   { title: "Inventory", url: "/ops/inventory", icon: Package },
+  { title: "Sign-up Approvals", url: "/approvals", icon: Users },
   { title: "Settings", url: "/settings/branding", icon: Settings },
 ];
 
