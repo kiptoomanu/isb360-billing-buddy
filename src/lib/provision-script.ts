@@ -66,24 +66,46 @@ export function buildAutoProvisionScript(i: AutoScriptInput) {
   const bridgeName = i.bridgeName || DEFAULT_BRIDGE;
   if (bridge) L.push(...buildBridgeLines(bridgeName, i.bridgePorts ?? DEFAULT_BRIDGE_PORTS, i.uplinkPort ?? "ether1"));
 
+  // LAN addressing so devices on the bridge get a valid IP, gateway and DNS
+  // (fixes "IP configuration error" on phones/laptops).
+  const lanIf = bridge ? bridgeName : null;
+  const uplink = i.uplinkPort ?? "ether1";
+  if (lanIf) {
+    L.push(`/ip address`);
+    L.push(`:if ([:len [find address="10.10.0.1/24"]] = 0) do={ add address=10.10.0.1/24 interface=${lanIf} comment="ISP360 LAN" } else={ set [find address="10.10.0.1/24"] interface=${lanIf} }`);
+    L.push(`/ip pool`);
+    L.push(`:if ([:len [find name="isp360-lan-pool"]] = 0) do={ add name=isp360-lan-pool ranges=10.10.0.10-10.10.0.254 } else={ set [find name="isp360-lan-pool"] ranges=10.10.0.10-10.10.0.254 }`);
+    L.push(`/ip dhcp-server network`);
+    L.push(`:if ([:len [find address="10.10.0.0/24"]] = 0) do={ add address=10.10.0.0/24 gateway=10.10.0.1 dns-server=10.10.0.1,8.8.8.8 comment="ISP360 LAN" } else={ set [find address="10.10.0.0/24"] gateway=10.10.0.1 dns-server=10.10.0.1,8.8.8.8 }`);
+    L.push(`/ip dhcp-server`);
+    L.push(`:if ([:len [find interface="${lanIf}"]] = 0) do={ add name=isp360-dhcp interface=${lanIf} address-pool=isp360-lan-pool lease-time=1h disabled=no } else={ set [find interface="${lanIf}"] address-pool=isp360-lan-pool disabled=no }`);
+  }
+  L.push(`/ip dns set allow-remote-requests=yes servers=8.8.8.8,1.1.1.1`);
+  L.push(`/ip dhcp-client`);
+  L.push(`:if ([:len [find interface="${uplink}"]] = 0) do={ add interface=${uplink} disabled=no add-default-route=yes use-peer-dns=yes comment="ISP360 uplink" }`);
+  L.push(`/ip firewall nat`);
+  L.push(`:if ([:len [find comment="ISP360 NAT"]] = 0) do={ add chain=srcnat out-interface=${uplink} action=masquerade comment="ISP360 NAT" }`);
+
   if (pppoe) {
     L.push(`/ip pool`);
-    L.push(`:if ([:len [find name="manu-pppoe-pool"]] = 0) do={ add name=manu-pppoe-pool ranges=${pool} }`);
+    L.push(`:if ([:len [find name="manu-pppoe-pool"]] = 0) do={ add name=manu-pppoe-pool ranges=10.20.0.2-10.20.0.254 } else={ set [find name="manu-pppoe-pool"] ranges=10.20.0.2-10.20.0.254 }`);
     L.push(`/ppp profile`);
-    L.push(`:if ([:len [find name="manu-pppoe"]] = 0) do={ add name=manu-pppoe local-address=${pool.split("-")[0]} remote-address=manu-pppoe-pool comment="ISP360 Billing" }`);
-    if (bridge) {
+    L.push(`:if ([:len [find name="manu-pppoe"]] = 0) do={ add name=manu-pppoe local-address=10.20.0.1 remote-address=manu-pppoe-pool dns-server=10.20.0.1,8.8.8.8 comment="ISP360 Billing" } else={ set [find name="manu-pppoe"] local-address=10.20.0.1 remote-address=manu-pppoe-pool dns-server=10.20.0.1,8.8.8.8 }`);
+    if (lanIf) {
       L.push(`/interface pppoe-server server`);
-      L.push(`:if ([:len [find interface="${bridgeName}"]] = 0) do={ add service-name=isp360 interface=${bridgeName} default-profile=manu-pppoe disabled=no } else={ set [find interface="${bridgeName}"] default-profile=manu-pppoe disabled=no }`);
+      L.push(`:if ([:len [find interface="${lanIf}"]] = 0) do={ add service-name=isp360 interface=${lanIf} default-profile=manu-pppoe disabled=no } else={ set [find interface="${lanIf}"] default-profile=manu-pppoe disabled=no }`);
     }
   }
   if (hotspot) {
-    L.push(`/ip pool`);
-    L.push(`:if ([:len [find name="manu-hotspot-pool"]] = 0) do={ add name=manu-hotspot-pool ranges=${pool} }`);
     L.push(`/ip hotspot user profile`);
     L.push(`:if ([:len [find name="manu-hotspot"]] = 0) do={ add name=manu-hotspot shared-users=1 comment="ISP360 Billing" }`);
-    if (bridge) {
+    if (lanIf) {
+      L.push(`/ip hotspot profile`);
+      L.push(`:if ([:len [find name="isp360-hs"]] = 0) do={ add name=isp360-hs hotspot-address=10.10.0.1 dns-name=login.isp360 login-by=http-chap,http-pap,cookie } else={ set [find name="isp360-hs"] hotspot-address=10.10.0.1 }`);
       L.push(`/ip hotspot`);
-      L.push(`:if ([:len [find interface="${bridgeName}"]] = 0) do={ add name=isp360-hotspot interface=${bridgeName} address-pool=manu-hotspot-pool profile=default disabled=no }`);
+      L.push(`:if ([:len [find interface="${lanIf}"]] = 0) do={ add name=isp360-hotspot interface=${lanIf} address-pool=isp360-lan-pool profile=isp360-hs disabled=no } else={ set [find interface="${lanIf}"] address-pool=isp360-lan-pool profile=isp360-hs disabled=no }`);
+      L.push(`/ip hotspot walled-garden`);
+      L.push(`:if ([:len [find dst-host="${new URL(i.origin).host}"]] = 0) do={ add dst-host="${new URL(i.origin).host}" comment="ISP360 portal" }`);
     }
   }
 
@@ -92,7 +114,7 @@ export function buildAutoProvisionScript(i: AutoScriptInput) {
     `:local board [/system resource get board-name];`,
     `:local ver [/system resource get version];`,
     `:local id [/system identity get name];`,
-    `/tool fetch url="${checkin}" http-method=post http-header-field="Content-Type: application/x-www-form-urlencoded" http-data=("model=" . $board . "&version=" . $ver . "&identity=" . $id) mode=https keep-result=no;`,
+    `/tool fetch url="${checkin}" http-method=post http-header-field="Content-Type: application/x-www-form-urlencoded" http-data=("model=" . $board . "&version=" . $ver . "&identity=" . $id) check-certificate=no keep-result=no;`,
   ].join(" ");
 
   L.push(`/system script`);
@@ -108,5 +130,5 @@ export function buildAutoProvisionScript(i: AutoScriptInput) {
 }
 
 export function buildOneLiner(origin: string, token: string) {
-  return `/tool fetch mode=https url="${origin}/api/public/provision/${token}" dst-path=isp360.rsc;:delay 2s;/import isp360.rsc;`;
+  return `/tool fetch check-certificate=no url="${origin}/api/public/provision/${token}" dst-path=isp360.rsc;:delay 2s;/import isp360.rsc;`;
 }
