@@ -46,7 +46,7 @@ export function buildBridgeLines(bridgeName: string, ports: string[], uplink: st
 
 export function buildAutoProvisionScript(i: AutoScriptInput) {
   const svc = i.use_https ? "www-ssl" : "www";
-  const pool = i.pool || "10.10.0.2-10.10.0.254";
+
   const pppoe = i.services.includes("pppoe");
   const hotspot = i.services.includes("hotspot");
   const checkin = `${i.origin}/api/public/provision/${i.token}/checkin`;
