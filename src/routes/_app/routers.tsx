@@ -450,7 +450,7 @@ function AutoSetup({ router }: { router: Router }) {
   const testFn = useServerFn(testRouter);
   const [verified, setVerified] = useState(false);
 
-  useEffect(() => { setOrigin(window.location.origin); }, []);
+  useEffect(() => { const o = window.location.origin; setOrigin(/id-preview--|localhost|lovableproject/.test(o) ? "https://isb360-billing-latest.lovable.app" : o); }, []);
 
   useEffect(() => {
     let alive = true;
