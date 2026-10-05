@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-export type SignupReview = { summary: string; missing: string[]; risk: "low" | "medium" | "high" };
+export type SignupReview = { summary: string; missing: string[]; risk: "low" | "medium" | "high"; error?: string };
 
 async function streamText(apiKey: string, prompt: string): Promise<string> {
   const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
@@ -57,7 +57,7 @@ export const reviewSignup = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<SignupReview> => {
     const db = context.supabase as any;
     const { data: isAdmin } = await db.rpc("has_role", { _user_id: context.userId, _role: "admin" });
-    if (!isAdmin) throw new Error("Only admins can review sign-ups.");
+    if (!isAdmin) return { summary: "", missing: [], risk: "low", error: "Only admins can review sign-ups." };
     const { data: p } = await db.from("profiles").select("email, full_name, avatar_url, created_at").eq("id", data.userId).maybeSingle();
     if (!p) throw new Error("Sign-up not found.");
     const apiKey = process.env["LOVABLE_API_KEY"];

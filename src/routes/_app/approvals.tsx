@@ -19,8 +19,13 @@ function Approvals() {
   const [busy, setBusy] = useState<string | null>(null);
   const review = useServerFn(reviewSignup);
 
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const load = async () => {
     setLoading(true);
+    const { data: u } = await supabase.auth.getUser();
+    const { data: admin } = u.user ? await db.rpc("has_role", { _user_id: u.user.id, _role: "admin" }) : { data: false };
+    setIsAdmin(!!admin);
+    if (!admin) { setLoading(false); return; }
     const [{ data: profiles, error }, { data: roles }] = await Promise.all([
       db.from("profiles").select("id, email, full_name, created_at").order("created_at", { ascending: false }),
       db.from("user_roles").select("user_id"),
@@ -36,6 +41,7 @@ function Approvals() {
     setBusy(id);
     try {
       const r = await review({ data: { userId: id } });
+      if (r.error) { toast.error(r.error); return; }
       setReviews((s) => ({ ...s, [id]: r }));
     } catch (e: any) {
       toast.error(e?.message ?? "Review failed");
@@ -57,7 +63,9 @@ function Approvals() {
         <h1 className="text-2xl font-bold">Sign-up Approvals</h1>
         <p className="text-sm text-muted-foreground">New people who signed up and are waiting for access. Use AI review to get a quick summary and spot missing details before approving.</p>
       </div>
-      {loading ? (
+      {isAdmin === false ? (
+        <Card className="p-8 text-center text-sm text-muted-foreground">Only admins can review and approve sign-ups.</Card>
+      ) : loading ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
       ) : rows.length === 0 ? (
         <Card className="p-8 text-center text-sm text-muted-foreground">No sign-ups waiting for approval.</Card>
