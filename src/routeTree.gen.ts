@@ -19,6 +19,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppWelcomeRouteImport } from './routes/_app/welcome'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppRoutersRouteImport } from './routes/_app/routers'
+import { Route as AppRouterDashboardRouteImport } from './routes/_app/router-dashboard'
 import { Route as AppPlansRouteImport } from './routes/_app/plans'
 import { Route as AppLoyaltyRouteImport } from './routes/_app/loyalty'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
@@ -90,6 +91,11 @@ const AppSettingsRoute = AppSettingsRouteImport.update({
 const AppRoutersRoute = AppRoutersRouteImport.update({
   id: '/routers',
   path: '/routers',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppRouterDashboardRoute = AppRouterDashboardRouteImport.update({
+  id: '/router-dashboard',
+  path: '/router-dashboard',
   getParentRoute: () => AppRoute,
 } as any)
 const AppPlansRoute = AppPlansRouteImport.update({
@@ -223,6 +229,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppDashboardRoute
   '/loyalty': typeof AppLoyaltyRoute
   '/plans': typeof AppPlansRoute
+  '/router-dashboard': typeof AppRouterDashboardRoute
   '/routers': typeof AppRoutersRoute
   '/settings': typeof AppSettingsRouteWithChildren
   '/welcome': typeof AppWelcomeRoute
@@ -257,6 +264,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AppDashboardRoute
   '/loyalty': typeof AppLoyaltyRoute
   '/plans': typeof AppPlansRoute
+  '/router-dashboard': typeof AppRouterDashboardRoute
   '/routers': typeof AppRoutersRoute
   '/welcome': typeof AppWelcomeRoute
   '/clients/hotspot': typeof AppClientsHotspotRoute
@@ -292,6 +300,7 @@ export interface FileRoutesById {
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/loyalty': typeof AppLoyaltyRoute
   '/_app/plans': typeof AppPlansRoute
+  '/_app/router-dashboard': typeof AppRouterDashboardRoute
   '/_app/routers': typeof AppRoutersRoute
   '/_app/settings': typeof AppSettingsRouteWithChildren
   '/_app/welcome': typeof AppWelcomeRoute
@@ -328,6 +337,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/loyalty'
     | '/plans'
+    | '/router-dashboard'
     | '/routers'
     | '/settings'
     | '/welcome'
@@ -362,6 +372,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/loyalty'
     | '/plans'
+    | '/router-dashboard'
     | '/routers'
     | '/welcome'
     | '/clients/hotspot'
@@ -396,6 +407,7 @@ export interface FileRouteTypes {
     | '/_app/dashboard'
     | '/_app/loyalty'
     | '/_app/plans'
+    | '/_app/router-dashboard'
     | '/_app/routers'
     | '/_app/settings'
     | '/_app/welcome'
@@ -501,6 +513,13 @@ declare module '@tanstack/react-router' {
       path: '/routers'
       fullPath: '/routers'
       preLoaderRoute: typeof AppRoutersRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/router-dashboard': {
+      id: '/_app/router-dashboard'
+      path: '/router-dashboard'
+      fullPath: '/router-dashboard'
+      preLoaderRoute: typeof AppRouterDashboardRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/plans': {
@@ -704,6 +723,7 @@ interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppLoyaltyRoute: typeof AppLoyaltyRoute
   AppPlansRoute: typeof AppPlansRoute
+  AppRouterDashboardRoute: typeof AppRouterDashboardRoute
   AppRoutersRoute: typeof AppRoutersRoute
   AppSettingsRoute: typeof AppSettingsRouteWithChildren
   AppWelcomeRoute: typeof AppWelcomeRoute
@@ -719,6 +739,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppLoyaltyRoute: AppLoyaltyRoute,
   AppPlansRoute: AppPlansRoute,
+  AppRouterDashboardRoute: AppRouterDashboardRoute,
   AppRoutersRoute: AppRoutersRoute,
   AppSettingsRoute: AppSettingsRouteWithChildren,
   AppWelcomeRoute: AppWelcomeRoute,
