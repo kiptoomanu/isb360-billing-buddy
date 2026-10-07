@@ -5,3 +5,7 @@
 - [x] Billing portal: pending renewals, confirm payments, issue refunds (linked to customer portal)
 - [x] Renewals settle by manual confirmation (user's choice); confirming updates expiry, status and router speed. Card/M-Pesa gateway not wired — awaiting the user's decision to add keys.
 - [x] Captive portal /hotspot: buy package via M-Pesa/card, auto-create account, auto-login (live charges need payment keys)
+- [x] Router dashboard: active customers, packages, payment confirmed time
+- [ ] Daraja keys in Settings → Payments — waiting on user to enter them
+- [ ] Sign-up alert emails — waiting on user to connect a domain
+- [ ] Phone-on-Wi-Fi test of buy page — needs user's physical router
