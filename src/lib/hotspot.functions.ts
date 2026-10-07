@@ -171,17 +171,18 @@ export const hotspotStatus = createServerFn({ method: "POST" })
   });
 
 export const verifyHotspotLogin = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ username: z.string().trim().min(3).max(60) }).parse(d))
+  .inputValidator((d: unknown) => z.object({ username: z.string().trim().min(3).max(60), password: z.string().max(60).optional() }).parse(d))
   .handler(async ({ data }) => {
     const db = await admin();
     const value = data.username.replace(/[,)("']/g, "");
     const { data: rows } = await db
       .from("clients")
-      .select("username, status, expiry_date, type")
+      .select("username, status, expiry_date, type, hotspot_password")
       .or(`username.eq.${value},username.eq.${value.toUpperCase()}`)
       .limit(1);
     const c = rows?.[0];
     if (!c) throw new Error("We couldn't find that code or account.");
+    if (c.hotspot_password && data.password !== undefined && data.password !== c.hotspot_password) throw new Error("Wrong password.");
     const expired = c.expiry_date && new Date(`${c.expiry_date}T23:59:59Z`).getTime() < Date.now();
     if (c.status !== "active" || expired) throw new Error("This code or account has expired. Buy a package below to reconnect.");
     return { username: c.username as string, expiry: c.expiry_date as string | null };
@@ -224,3 +225,32 @@ export const getPortalDesign = createServerFn({ method: "GET" }).handler(async (
     notice: typeof d.notice_text === "string" && d.notice_text.trim() ? d.notice_text.slice(0, 300) : null,
   };
 });
+
+export const createHotspotAccount = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z.object({
+      fullName: z.string().trim().min(2).max(80),
+      phone: z.string().trim().min(9).max(20),
+      username: z.string().trim().min(3).max(30).regex(/^[A-Za-z0-9_.-]+$/, "Username can only use letters, numbers, dots, dashes and underscores."),
+      password: z.string().min(4).max(40),
+      routerId: z.string().uuid().optional(),
+    }).parse(d),
+  )
+  .handler(async ({ data }) => {
+    const db = await admin();
+    const { normalizePhone } = await import("./mpesa.server");
+    const phone = normalizePhone(data.phone);
+    const { data: taken } = await db.from("clients").select("id").eq("username", data.username).limit(1);
+    if (taken?.length) throw new Error("That username is already taken. Try another.");
+    let routerId = data.routerId ?? null;
+    if (!routerId) {
+      const { data: r } = await db.from("routers").select("id").order("created_at").limit(1);
+      routerId = r?.[0]?.id ?? null;
+    }
+    const { error } = await db.from("clients").insert({
+      full_name: data.fullName, phone, username: data.username, hotspot_password: data.password,
+      type: "hotspot", status: "expired", router_id: routerId,
+    });
+    if (error) throw new Error(error.message);
+    return { username: data.username };
+  });

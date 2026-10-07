@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { getPortalDesign, type PortalDesign, verifyHotspotLogin, listHotspotPlans, purchaseHotspot, hotspotStatus, type HotspotPlan } from "@/lib/hotspot.functions";
+import { getPortalDesign, type PortalDesign, verifyHotspotLogin, createHotspotAccount, listHotspotPlans, purchaseHotspot, hotspotStatus, type HotspotPlan } from "@/lib/hotspot.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -79,13 +79,28 @@ function HotspotPage() {
   const [pass, setPass] = useState("");
   const [creds, setCreds] = useState<{ u: string; p: string } | null>(null);
   const loginRef = useRef<HTMLFormElement>(null);
+  const createAcc = useServerFn(createHotspotAccount);
+  const [signup, setSignup] = useState(false);
+  const [newAcc, setNewAcc] = useState({ name: "", phone: "", user: "", pass: "" });
+  async function register() {
+    setBusy(true); setErr(null); setMsg(null);
+    try {
+      const r = await createAcc({ data: { fullName: newAcc.name, phone: newAcc.phone, username: newAcc.user, password: newAcc.pass, routerId: search.router } });
+      setSignup(false); setUser(r.username); setPass(newAcc.pass); setPhone(newAcc.phone);
+      setMsg("Account created! Now buy a package to get online, then log in.");
+      setTab("buy");
+    } catch (e: any) {
+      const m = e?.message ?? "Could not create account.";
+      setErr(m.startsWith("[") ? "Please fill in all fields correctly." : m);
+    } finally { setBusy(false); }
+  }
 
   async function signIn(u: string, p: string) {
     setBusy(true);
     setErr(null);
     setMsg(null);
     try {
-      const r = await verify({ data: { username: u } });
+      const r = await verify({ data: { username: u, password: p } });
       if (!search.login) {
         setMsg("Code accepted. Enter it on the Wi-Fi login page to connect.");
         return;
@@ -204,11 +219,23 @@ function HotspotPage() {
                 <Button className="w-full" disabled={busy || voucher.length < 3} onClick={() => signIn(voucher.trim(), voucher.trim())}>Connect</Button>
               </Card>
             )}
-            {tab === "account" && (
+            {tab === "account" && signup && (
+              <Card className="space-y-3 p-4">
+                <p className="font-semibold">Create hotspot account</p>
+                <div className="grid gap-2"><Label>Full name</Label><Input value={newAcc.name} onChange={(e) => setNewAcc({ ...newAcc, name: e.target.value })} /></div>
+                <div className="grid gap-2"><Label>Phone number</Label><Input inputMode="tel" placeholder="07XX XXX XXX" value={newAcc.phone} onChange={(e) => setNewAcc({ ...newAcc, phone: e.target.value })} /></div>
+                <div className="grid gap-2"><Label>Choose a username</Label><Input value={newAcc.user} onChange={(e) => setNewAcc({ ...newAcc, user: e.target.value.replace(/\s/g, "") })} /></div>
+                <div className="grid gap-2"><Label>Choose a password</Label><Input type="password" value={newAcc.pass} onChange={(e) => setNewAcc({ ...newAcc, pass: e.target.value })} /></div>
+                <Button className="w-full" disabled={busy || newAcc.name.length < 2 || newAcc.phone.length < 9 || newAcc.user.length < 3 || newAcc.pass.length < 4} onClick={register}>Create account</Button>
+                <button type="button" className="w-full text-center text-sm text-primary" onClick={() => setSignup(false)}>Already have an account? Log in</button>
+              </Card>
+            )}
+            {tab === "account" && !signup && (
               <Card className="space-y-3 p-4">
                 <div className="grid gap-2"><Label>Username</Label><Input value={user} onChange={(e) => setUser(e.target.value)} /></div>
                 <div className="grid gap-2"><Label>Password</Label><Input type="password" value={pass} onChange={(e) => setPass(e.target.value)} /></div>
                 <Button className="w-full" disabled={busy || user.length < 3} onClick={() => signIn(user.trim(), pass)}>Log in</Button>
+                <button type="button" className="w-full text-center text-sm text-primary" onClick={() => { setSignup(true); setErr(null); setMsg(null); }}>New here? Create an account</button>
               </Card>
             )}
             {creds && search.login && (
