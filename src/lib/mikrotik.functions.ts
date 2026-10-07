@@ -92,13 +92,18 @@ export async function pushClientToRouter(supabase: any, clientId: string) {
 
     // Plan speed → RouterOS rate-limit "upload/download" in kbps
     let rateLimit: string | undefined;
+    let planName = "No package";
     if (client.plan_id) {
       const { data: plan } = await supabase
-        .from("plans").select("download_kbps,upload_kbps").eq("id", client.plan_id).maybeSingle();
+        .from("plans").select("name,download_kbps,upload_kbps").eq("id", client.plan_id).maybeSingle();
+      if (plan?.name) planName = plan.name;
       if (plan && (plan.download_kbps || plan.upload_kbps)) {
         rateLimit = `${plan.upload_kbps || plan.download_kbps}k/${plan.download_kbps || plan.upload_kbps}k`;
       }
     }
+
+    // Shown in WinBox next to each user so package/expiry is visible on the router itself.
+    const comment = `ISP360 | ${client.full_name} | ${planName} | expires ${client.expiry_date ?? "-"}`.slice(0, 120);
 
     if (client.type === "pppoe") {
       const id = await findByName(router, "ppp/secret", client.username);
@@ -107,6 +112,7 @@ export async function pushClientToRouter(supabase: any, clientId: string) {
         password: client.username, // placeholder; real impl should store separately
         service: "pppoe",
         disabled,
+        comment,
       };
       if (rateLimit) payload["rate-limit"] = rateLimit;
       if (id) {
@@ -123,6 +129,7 @@ export async function pushClientToRouter(supabase: any, clientId: string) {
         name: client.username,
         password: client.username,
         disabled,
+        comment,
       };
       if (rateLimit) payload["rate-limit"] = rateLimit;
       if (id) {
