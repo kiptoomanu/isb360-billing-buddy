@@ -43,6 +43,7 @@ const network: Item[] = [
   { title: "Static IP", url: "/clients/static", icon: Network },
   { title: "Hotspot", url: "/clients/hotspot", icon: Radio },
   { title: "MikroTik Routers", url: "/routers", icon: RouterIcon },
+  { title: "Router Dashboard", url: "/router-dashboard", icon: RouterIcon },
   { title: "Plans & Packages", url: "/plans", icon: Layers },
   { title: "Loyalty Points", url: "/loyalty", icon: Award },
 
