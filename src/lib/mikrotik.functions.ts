@@ -127,7 +127,7 @@ export async function pushClientToRouter(supabase: any, clientId: string) {
       const id = await findByName(router, "ip/hotspot/user", client.username);
       const payload: any = {
         name: client.username,
-        password: client.username,
+        password: client.hotspot_password || client.username,
         disabled,
         comment,
       };

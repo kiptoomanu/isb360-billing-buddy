@@ -38,6 +38,7 @@ export type Database = {
           email: string | null
           expiry_date: string | null
           full_name: string
+          hotspot_password: string | null
           id: string
           ip_address: string | null
           loyalty_points: number
@@ -56,6 +57,7 @@ export type Database = {
           email?: string | null
           expiry_date?: string | null
           full_name: string
+          hotspot_password?: string | null
           id?: string
           ip_address?: string | null
           loyalty_points?: number
@@ -74,6 +76,7 @@ export type Database = {
           email?: string | null
           expiry_date?: string | null
           full_name?: string
+          hotspot_password?: string | null
           id?: string
           ip_address?: string | null
           loyalty_points?: number
