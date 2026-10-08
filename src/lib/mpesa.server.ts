@@ -70,7 +70,20 @@ export async function stkPush(opts: {
     headers: { Authorization: `Basic ${btoa(`${cfg.consumerKey}:${cfg.consumerSecret}`)}` },
   });
   const tokText = await tokRes.text();
-  if (!tokRes.ok) throw new Error(`M-Pesa rejected the API keys [${tokRes.status}]. Check Settings → Payments.`);
+  if (!tokRes.ok) {
+    console.error("[mpesa] token failed", tokRes.status, tokText.slice(0, 300));
+    // Detect the most common mistake: test (sandbox) keys saved with Environment = Live, or the reverse.
+    const other = cfg.live ? "https://sandbox.safaricom.co.ke" : "https://api.safaricom.co.ke";
+    const probe = await fetch(`${other}/oauth/v1/generate?grant_type=client_credentials`, {
+      headers: { Authorization: `Basic ${btoa(`${cfg.consumerKey}:${cfg.consumerSecret}`)}` },
+    }).catch(() => null);
+    if (probe?.ok) {
+      throw new Error(cfg.live
+        ? "These are Daraja TEST keys but Environment is set to Live. In Settings → Payments, switch Environment to Test, or enter your live (Go Live) keys."
+        : "These are Daraja LIVE keys but Environment is set to Test. In Settings → Payments, switch Environment to Live.");
+    }
+    throw new Error("Safaricom did not accept the Consumer key / secret. Copy them again from your Daraja app (no spaces) in Settings → Payments.");
+  }
   const token = (JSON.parse(tokText) as { access_token?: string }).access_token;
   if (!token) throw new Error("M-Pesa did not return an access token.");
 
