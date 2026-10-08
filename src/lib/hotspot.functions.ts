@@ -84,8 +84,14 @@ export const purchaseHotspot = createServerFn({ method: "POST" })
       routerId = r?.[0]?.id ?? null;
     }
 
-    const code = makeCode();
-    const { data: client, error: cErr } = await db
+    // Reuse a self-created hotspot account with this phone, so the package lands on it.
+    const { data: existing } = await db.from("clients").select("id, username")
+      .eq("phone", phone).eq("type", "hotspot").not("hotspot_password", "is", null)
+      .order("created_at", { ascending: false }).limit(1);
+    const code = existing?.[0]?.username ?? makeCode();
+    const { data: client, error: cErr } = existing?.[0]
+      ? await db.from("clients").update({ plan_id: plan.id, monthly_fee: plan.price, router_id: routerId }).eq("id", existing[0].id).select("id").single()
+      : await db
       .from("clients")
       .insert({
         full_name: `Hotspot ${phone}`,
